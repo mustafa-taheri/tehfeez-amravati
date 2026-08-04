@@ -1,0 +1,493 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+enum UserRole {
+  ADMIN
+  HUFFAZ
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum AttendanceStatus {
+  PRESENT
+  HALF_DAY
+  LEAVE
+  ABSENT
+  UZUR
+}
+
+enum StudentStatus {
+  ACTIVE
+  ON_LEAVE
+  COMPLETED
+  SHIFTED
+  DISCONTINUED
+}
+
+enum PaymentStatus {
+  PAID
+  PARTIAL_PAID
+  UNPAID
+  WAIVED
+  DISCOUNTED
+}
+
+enum SessionType {
+  HIFZ
+  MURAJAAH
+  MIXED
+}
+
+enum SettlementStatus {
+  DRAFT
+  GENERATED
+  LOCKED
+}
+
+enum MarhalaCode {
+  ULA
+  SANIYAH
+  SALESAH
+  RABEAH
+  KHAMESAH
+  SADESAH
+}
+
+// -----------------------------------------------------------------------------
+// Models
+// -----------------------------------------------------------------------------
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  firstName    String    @db.VarChar(100)
+  lastName     String?   @db.VarChar(100)
+  fullName     String    @db.VarChar(200)
+  username     String    @unique @db.VarChar(100)
+  email        String?   @unique @db.VarChar(150)
+  mobileNumber String    @unique @db.VarChar(20)
+  passwordHash String    @db.Text
+  role         UserRole  @default(HUFFAZ)
+  profileImage String?   @db.Text
+  lastLoginAt  DateTime? @db.Timestamp()
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @db.Timestamp()
+  createdBy    String?   @db.Uuid
+  updatedAt    DateTime  @default(now()) @updatedAt @db.Timestamp()
+  updatedBy    String?   @db.Uuid
+  deletedAt    DateTime? @db.Timestamp()
+  deletedBy    String?   @db.Uuid
+
+  huffazAttendances       HuffazAttendance[]        @relation("HuffazAttendanceUser")
+  huffazAttendancesMarked HuffazAttendance[]        @relation("HuffazAttendanceMarkedBy")
+  quranSessions           QuranSession[]            @relation("QuranSessionHuffaz")
+  recordedSessions        QuranSession[]            @relation("QuranSessionRecordedBy")
+  feePaymentTransactions  FeePaymentTransaction[]   @relation("FeePaymentReceivedBy")
+  settlementAdjustments   SettlementAdjustment[]    @relation("AdjustmentAdjustedBy")
+  studentAttendances      StudentAttendance[]       @relation("StudentAttendanceMarkedBy")
+  studentNotes            StudentNote[]             @relation("StudentNoteCreatedBy")
+  marhalaHistories        MarhalaHistory[]          @relation("MarhalaHistoryPromotedBy")
+  monthlySettlementsGen   MonthlySettlement[]       @relation("SettlementGeneratedBy")
+  monthlySettlementsLock  MonthlySettlement[]       @relation("SettlementLockedBy")
+  monthlySettlementDetails MonthlySettlementDetail[] @relation("MonthlySettlementDetailHuffaz")
+  feeCollectionsCollected StudentFeeCollection[]    @relation("StudentFeeCollectionCollectedBy")
+
+  @@index([role])
+  @@index([isActive])
+}
+
+model AcademicPeriod {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique @db.VarChar(50)
+  startDate DateTime  @db.Date
+  endDate   DateTime  @db.Date
+  isCurrent Boolean   @default(false)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now()) @db.Timestamp()
+  createdBy String?   @db.Uuid
+  updatedAt DateTime  @default(now()) @updatedAt @db.Timestamp()
+  updatedBy String?   @db.Uuid
+  deletedAt DateTime? @db.Timestamp()
+  deletedBy String?   @db.Uuid
+
+  academicMonths           AcademicMonth[]
+  marhalaFeeConfigurations MarhalaFeeConfiguration[]
+
+  @@index([isCurrent])
+}
+
+model AcademicMonth {
+  id               String           @id @default(uuid()) @db.Uuid
+  academicPeriodId String           @db.Uuid
+  name             String           @db.VarChar(50)
+  monthNumber      Int              @db.SmallInt
+  year             Int              @db.Integer
+  startDate        DateTime         @db.Date
+  endDate          DateTime         @db.Date
+  workingDays      Int              @db.SmallInt
+  settlementStatus SettlementStatus @default(DRAFT)
+  isCurrent        Boolean          @default(false)
+  isActive         Boolean          @default(true)
+  createdAt        DateTime         @default(now()) @db.Timestamp()
+  createdBy        String?          @db.Uuid
+  updatedAt        DateTime         @default(now()) @updatedAt @db.Timestamp()
+  updatedBy        String?          @db.Uuid
+  deletedAt        DateTime?        @db.Timestamp()
+  deletedBy        String?          @db.Uuid
+
+  academicPeriod AcademicPeriod @relation(fields: [academicPeriodId], references: [id])
+
+  studentAttendances    StudentAttendance[]
+  huffazAttendances     HuffazAttendance[]
+  quranSessions         QuranSession[]
+  studentFeeCollections StudentFeeCollection[]
+  monthlySettlement     MonthlySettlement?
+
+  @@unique([academicPeriodId, monthNumber, year])
+  @@index([academicPeriodId])
+  @@index([monthNumber])
+  @@index([settlementStatus])
+  @@index([isCurrent])
+}
+
+model Marhala {
+  id           String      @id @default(uuid()) @db.Uuid
+  code         MarhalaCode @unique
+  name         String      @db.VarChar(100)
+  displayOrder Int         @unique @db.SmallInt
+  description  String?     @db.Text
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now()) @db.Timestamp()
+
+  students                 Student[]
+  marhalaHistoriesFrom     MarhalaHistory[]          @relation("MarhalaHistoryFrom")
+  marhalaHistoriesTo       MarhalaHistory[]          @relation("MarhalaHistoryTo")
+  marhalaFeeConfigurations MarhalaFeeConfiguration[]
+}
+
+model MarhalaFeeConfiguration {
+  id               String    @id @default(uuid()) @db.Uuid
+  academicPeriodId String    @db.Uuid
+  marhalaId        String    @db.Uuid
+  monthlyFee       Decimal   @default(0.00) @db.Decimal(10, 2)
+  effectiveFrom    DateTime  @db.Date
+  effectiveTo      DateTime? @db.Date
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now()) @db.Timestamp()
+  createdBy        String?   @db.Uuid
+  updatedAt        DateTime  @default(now()) @updatedAt @db.Timestamp()
+  updatedBy        String?   @db.Uuid
+
+  academicPeriod AcademicPeriod @relation(fields: [academicPeriodId], references: [id])
+  marhala        Marhala        @relation(fields: [marhalaId], references: [id])
+
+  studentFeeCollections StudentFeeCollection[]
+
+  @@unique([academicPeriodId, marhalaId])
+  @@index([academicPeriodId])
+  @@index([marhalaId])
+}
+
+model Student {
+  id                 String        @id @default(uuid()) @db.Uuid
+  itsNumber          String        @unique @db.VarChar(20)
+  firstName          String        @db.VarChar(100)
+  lastName           String?       @db.VarChar(100)
+  fullName           String        @db.VarChar(200)
+  fatherName         String?       @db.VarChar(200)
+  gender             Gender
+  dateOfBirth        DateTime?     @db.Date
+  admissionDate      DateTime      @default(dbgenerated("CURRENT_DATE")) @db.Date
+  mobileNumber       String?       @db.VarChar(20)
+  parentMobileNumber String        @db.VarChar(20)
+  address            String?       @db.Text
+  photoUrl           String?       @db.Text
+  currentMarhalaId   String        @db.Uuid
+  status             StudentStatus @default(ACTIVE)
+  remarks            String?       @db.Text
+  isActive           Boolean       @default(true)
+  createdAt          DateTime      @default(now()) @db.Timestamp()
+  createdBy          String?       @db.Uuid
+  updatedAt          DateTime      @default(now()) @updatedAt @db.Timestamp()
+  updatedBy          String?       @db.Uuid
+  deletedAt          DateTime?     @db.Timestamp()
+  deletedBy          String?       @db.Uuid
+
+  currentMarhala Marhala @relation(fields: [currentMarhalaId], references: [id])
+
+  studentAttendances    StudentAttendance[]
+  quranSessions         QuranSession[]
+  studentNotes          StudentNote[]
+  marhalaHistories      MarhalaHistory[]
+  studentFeeCollections StudentFeeCollection[]
+
+  @@index([currentMarhalaId])
+  @@index([status])
+  @@index([parentMobileNumber])
+  @@index([isActive])
+}
+
+model StudentAttendance {
+  id               String           @id @default(uuid()) @db.Uuid
+  studentId        String           @db.Uuid
+  academicMonthId  String           @db.Uuid
+  attendanceDate   DateTime         @db.Date
+  attendanceStatus AttendanceStatus @default(PRESENT)
+  remarks          String?          @db.Text
+  markedBy         String           @db.Uuid
+  markedAt         DateTime         @default(now()) @db.Timestamp()
+  createdAt        DateTime         @default(now()) @db.Timestamp()
+  updatedAt        DateTime         @default(now()) @updatedAt @db.Timestamp()
+
+  student       Student       @relation(fields: [studentId], references: [id])
+  academicMonth AcademicMonth @relation(fields: [academicMonthId], references: [id])
+  markedByUser  User          @relation("StudentAttendanceMarkedBy", fields: [markedBy], references: [id])
+
+  @@unique([studentId, attendanceDate])
+  @@index([academicMonthId])
+  @@index([attendanceDate])
+  @@index([attendanceStatus])
+}
+
+model StudentNote {
+  id        String   @id @default(uuid()) @db.Uuid
+  studentId String   @db.Uuid
+  noteDate  DateTime @default(dbgenerated("CURRENT_DATE")) @db.Date
+  title     String?  @db.VarChar(150)
+  note      String   @db.Text
+  createdBy String   @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamp()
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp()
+
+  student       Student @relation(fields: [studentId], references: [id])
+  createdByUser User    @relation("StudentNoteCreatedBy", fields: [createdBy], references: [id])
+
+  @@index([studentId])
+  @@index([noteDate])
+  @@index([createdBy])
+}
+
+model MarhalaHistory {
+  id            String   @id @default(uuid()) @db.Uuid
+  studentId     String   @db.Uuid
+  fromMarhalaId String?  @db.Uuid
+  toMarhalaId   String   @db.Uuid
+  effectiveDate DateTime @default(dbgenerated("CURRENT_DATE")) @db.Date
+  reason        String?  @db.Text
+  promotedBy    String   @db.Uuid
+  createdAt     DateTime @default(now()) @db.Timestamp()
+
+  student        Student  @relation(fields: [studentId], references: [id])
+  fromMarhala    Marhala? @relation("MarhalaHistoryFrom", fields: [fromMarhalaId], references: [id])
+  toMarhala      Marhala  @relation("MarhalaHistoryTo", fields: [toMarhalaId], references: [id])
+  promotedByUser User     @relation("MarhalaHistoryPromotedBy", fields: [promotedBy], references: [id])
+
+  @@index([studentId])
+  @@index([effectiveDate])
+  @@index([toMarhalaId])
+}
+
+model QuranSession {
+  id              String      @id @default(uuid()) @db.Uuid
+  studentId       String      @db.Uuid
+  huffazId        String      @db.Uuid
+  academicMonthId String      @db.Uuid
+  sessionDate     DateTime    @default(dbgenerated("CURRENT_DATE")) @db.Date
+  sessionType     SessionType @default(MIXED)
+  siparaNumber    Int?        @db.SmallInt
+  surahName       String?     @db.VarChar(150)
+  startAyah       Int?        @db.Integer
+  endAyah         Int?        @db.Integer
+  murajaahJuz     Int?        @db.SmallInt
+  murajaahMarks   Decimal?    @db.Decimal(5, 2)
+  juzHaaliMarks   Decimal?    @db.Decimal(5, 2)
+  jadeedStartAyah Int?        @db.Integer
+  jadeedEndAyah   Int?        @db.Integer
+  tasmeeMarks     Decimal?    @db.Decimal(5, 2)
+  hifzProgress    String?     @db.VarChar(200)
+  durationMinutes Int?        @db.SmallInt
+  remarks         String?     @db.Text
+  recordedBy      String      @db.Uuid
+  createdAt       DateTime    @default(now()) @db.Timestamp()
+  updatedAt       DateTime    @default(now()) @updatedAt @db.Timestamp()
+  deletedAt       DateTime?   @db.Timestamp()
+  deletedBy       String?     @db.Uuid
+  isActive        Boolean     @default(true)
+
+  student        Student       @relation(fields: [studentId], references: [id])
+  huffaz         User          @relation("QuranSessionHuffaz", fields: [huffazId], references: [id])
+  academicMonth  AcademicMonth @relation(fields: [academicMonthId], references: [id])
+  recordedByUser User          @relation("QuranSessionRecordedBy", fields: [recordedBy], references: [id])
+
+  @@index([studentId])
+  @@index([huffazId])
+  @@index([academicMonthId])
+  @@index([sessionDate])
+  @@index([sessionType])
+}
+
+model HuffazAttendance {
+  id                String           @id @default(uuid()) @db.Uuid
+  userId            String           @db.Uuid
+  academicMonthId   String           @db.Uuid
+  attendanceDate    DateTime         @db.Date
+  attendanceStatus  AttendanceStatus @default(PRESENT)
+  payablePercentage Decimal          @default(100.00) @db.Decimal(5, 2)
+  remarks           String?          @db.Text
+  markedBy          String           @db.Uuid
+  markedAt          DateTime         @default(now()) @db.Timestamp()
+  createdAt         DateTime         @default(now()) @db.Timestamp()
+  updatedAt         DateTime         @default(now()) @updatedAt @db.Timestamp()
+
+  user          User          @relation("HuffazAttendanceUser", fields: [userId], references: [id])
+  academicMonth AcademicMonth @relation(fields: [academicMonthId], references: [id])
+  markedByUser  User          @relation("HuffazAttendanceMarkedBy", fields: [markedBy], references: [id])
+
+  @@unique([userId, attendanceDate])
+  @@index([academicMonthId])
+  @@index([attendanceDate])
+  @@index([attendanceStatus])
+}
+
+model StudentFeeCollection {
+  id                        String        @id @default(uuid()) @db.Uuid
+  studentId                 String        @db.Uuid
+  academicMonthId           String        @db.Uuid
+  marhalaFeeConfigurationId String        @db.Uuid
+  configuredFee             Decimal       @default(0.00) @db.Decimal(10, 2)
+  discountAmount            Decimal       @default(0.00) @db.Decimal(10, 2)
+  waivedAmount              Decimal       @default(0.00) @db.Decimal(10, 2)
+  totalReceivedAmount       Decimal       @default(0.00) @db.Decimal(10, 2)
+  outstandingAmount         Decimal       @default(0.00) @db.Decimal(10, 2)
+  paymentStatus             PaymentStatus @default(UNPAID)
+  remarks                   String?       @db.Text
+  collectedBy               String?       @db.Uuid
+  createdAt                 DateTime      @default(now()) @db.Timestamp()
+  createdBy                 String?       @db.Uuid
+  updatedAt                 DateTime      @default(now()) @updatedAt @db.Timestamp()
+  updatedBy                 String?       @db.Uuid
+  deletedAt                 DateTime?     @db.Timestamp()
+  deletedBy                 String?       @db.Uuid
+  isActive                  Boolean       @default(true)
+
+  student                 Student                 @relation(fields: [studentId], references: [id])
+  academicMonth           AcademicMonth           @relation(fields: [academicMonthId], references: [id])
+  marhalaFeeConfiguration MarhalaFeeConfiguration @relation(fields: [marhalaFeeConfigurationId], references: [id])
+  collectedByUser         User?                   @relation("StudentFeeCollectionCollectedBy", fields: [collectedBy], references: [id])
+
+  feePaymentTransactions FeePaymentTransaction[]
+
+  @@unique([studentId, academicMonthId])
+  @@index([studentId])
+  @@index([academicMonthId])
+  @@index([paymentStatus])
+  @@index([collectedBy])
+}
+
+model FeePaymentTransaction {
+  id                     String    @id @default(uuid()) @db.Uuid
+  studentFeeCollectionId String    @db.Uuid
+  transactionDate        DateTime  @default(dbgenerated("CURRENT_DATE")) @db.Date
+  amount                 Decimal   @default(0.00) @db.Decimal(10, 2)
+  paymentMode            String    @default("CASH") @db.VarChar(30)
+  referenceNumber        String?   @db.VarChar(100)
+  remarks                String?   @db.Text
+  receivedBy             String    @db.Uuid
+  createdAt              DateTime  @default(now()) @db.Timestamp()
+  updatedAt              DateTime  @default(now()) @updatedAt @db.Timestamp()
+  deletedAt              DateTime? @db.Timestamp()
+  deletedBy              String?   @db.Uuid
+  isActive               Boolean   @default(true)
+
+  studentFeeCollection StudentFeeCollection @relation(fields: [studentFeeCollectionId], references: [id])
+  receivedByUser       User                 @relation("FeePaymentReceivedBy", fields: [receivedBy], references: [id])
+
+  @@index([studentFeeCollectionId])
+  @@index([transactionDate])
+  @@index([receivedBy])
+  @@index([paymentMode])
+  @@index([studentFeeCollectionId, transactionDate])
+}
+
+model MonthlySettlement {
+  id                   String           @id @default(uuid()) @db.Uuid
+  academicMonthId      String           @unique @db.Uuid
+  totalStudents        Int              @default(0) @db.Integer
+  totalConfiguredFees  Decimal          @default(0.00) @db.Decimal(10, 2)
+  totalDiscountAmount  Decimal          @default(0.00) @db.Decimal(10, 2)
+  totalWaivedAmount    Decimal          @default(0.00) @db.Decimal(10, 2)
+  totalCollectedAmount Decimal          @default(0.00) @db.Decimal(10, 2)
+  totalPayablePool     Decimal          @default(0.00) @db.Decimal(10, 2)
+  settlementStatus     SettlementStatus @default(GENERATED)
+  generatedAt          DateTime         @default(now()) @db.Timestamp()
+  generatedBy          String           @db.Uuid
+  lockedAt             DateTime?        @db.Timestamp()
+  lockedBy             String?          @db.Uuid
+  remarks              String?          @db.Text
+  createdAt            DateTime         @default(now()) @db.Timestamp()
+  updatedAt            DateTime         @default(now()) @updatedAt @db.Timestamp()
+
+  academicMonth   AcademicMonth @relation(fields: [academicMonthId], references: [id])
+  generatedByUser User          @relation("SettlementGeneratedBy", fields: [generatedBy], references: [id])
+  lockedByUser    User?         @relation("SettlementLockedBy", fields: [lockedBy], references: [id])
+
+  monthlySettlementDetails MonthlySettlementDetail[]
+
+  @@index([settlementStatus])
+  @@index([generatedBy])
+}
+
+model MonthlySettlementDetail {
+  id                   String   @id @default(uuid()) @db.Uuid
+  monthlySettlementId  String   @db.Uuid
+  userId               String   @db.Uuid
+  attendanceDays       Decimal  @default(0.00) @db.Decimal(5, 2)
+  attendancePercentage Decimal  @default(0.00) @db.Decimal(5, 2)
+  calculatedAmount     Decimal  @default(0.00) @db.Decimal(10, 2)
+  bonusAmount          Decimal  @default(0.00) @db.Decimal(10, 2)
+  deductionAmount      Decimal  @default(0.00) @db.Decimal(10, 2)
+  finalPayableAmount   Decimal  @default(0.00) @db.Decimal(10, 2)
+  remarks              String?  @db.Text
+  createdAt            DateTime @default(now()) @db.Timestamp()
+  updatedAt            DateTime @default(now()) @updatedAt @db.Timestamp()
+
+  monthlySettlement MonthlySettlement      @relation(fields: [monthlySettlementId], references: [id])
+  user              User                   @relation("MonthlySettlementDetailHuffaz", fields: [userId], references: [id])
+  adjustments       SettlementAdjustment[]
+
+  @@unique([monthlySettlementId, userId])
+  @@index([userId])
+  @@index([finalPayableAmount])
+}
+
+model SettlementAdjustment {
+  id                        String   @id @default(uuid()) @db.Uuid
+  monthlySettlementDetailId String   @db.Uuid
+  adjustmentType            String   @db.VarChar(20)
+  amount                    Decimal  @default(0.00) @db.Decimal(10, 2)
+  reason                    String   @db.Text
+  adjustedBy                String   @db.Uuid
+  adjustedAt                DateTime @default(now()) @db.Timestamp()
+  createdAt                 DateTime @default(now()) @db.Timestamp()
+
+  monthlySettlementDetail MonthlySettlementDetail @relation(fields: [monthlySettlementDetailId], references: [id])
+  adjustedByUser          User                    @relation("AdjustmentAdjustedBy", fields: [adjustedBy], references: [id])
+
+  @@index([monthlySettlementDetailId])
+  @@index([adjustedBy])
+  @@index([adjustedAt])
+}
