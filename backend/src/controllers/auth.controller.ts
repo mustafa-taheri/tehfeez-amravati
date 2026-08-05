@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
-import { generateTokens } from '../utils/jwt';
+import type { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import { PrismaClient } from "@prisma/client";
+import { generateTokens } from "../utils/jwt.js";
 
 const prisma = new PrismaClient();
 
@@ -12,8 +12,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!username || !password) {
       res.status(400).json({
         success: false,
-        message: 'Validation failed.',
-        errors: [{ field: 'username/password', message: 'Username and password are required' }]
+        message: "Validation failed.",
+        errors: [
+          {
+            field: "username/password",
+            message: "Username and password are required",
+          },
+        ],
       });
       return;
     }
@@ -21,19 +26,37 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const user = await prisma.user.findUnique({ where: { username } });
 
     if (!user) {
-      res.status(401).json({ success: false, message: 'Invalid username or password.', code: 'INVALID_CREDENTIALS' });
+      res
+        .status(401)
+        .json({
+          success: false,
+          message: "Invalid username or password.",
+          code: "INVALID_CREDENTIALS",
+        });
       return;
     }
 
     if (!user.isActive) {
-      res.status(403).json({ success: false, message: 'User account is inactive.', code: 'ACCESS_DENIED' });
+      res
+        .status(403)
+        .json({
+          success: false,
+          message: "User account is inactive.",
+          code: "ACCESS_DENIED",
+        });
       return;
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!isMatch) {
-      res.status(401).json({ success: false, message: 'Invalid username or password.', code: 'INVALID_CREDENTIALS' });
+      res
+        .status(401)
+        .json({
+          success: false,
+          message: "Invalid username or password.",
+          code: "INVALID_CREDENTIALS",
+        });
       return;
     }
 
@@ -42,12 +65,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Update last login
     await prisma.user.update({
       where: { id: user.id },
-      data: { lastLoginAt: new Date() }
+      data: { lastLoginAt: new Date() },
     });
 
     res.status(200).json({
       success: true,
-      message: 'Login successful.',
+      message: "Login successful.",
       data: {
         user: {
           id: user.id,
@@ -58,16 +81,25 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           role: user.role,
           profileImage: user.profileImage,
         },
-        tokens
-      }
+        tokens,
+      },
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.', code: 'INTERNAL_SERVER_ERROR' });
+    console.error("Login error:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Internal server error.",
+        code: "INTERNAL_SERVER_ERROR",
+      });
   }
 };
 
-export const refreshToken = async (req: Request, res: Response): Promise<void> => {
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   // Omitted full implementation for brevity, logic involves verifying refresh token and re-issuing tokens.
-  res.status(501).json({ success: false, message: 'Not implemented yet' });
+  res.status(501).json({ success: false, message: "Not implemented yet" });
 };
