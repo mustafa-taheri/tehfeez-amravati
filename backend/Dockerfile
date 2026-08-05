@@ -28,4 +28,4 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
 EXPOSE 5000
-CMD ["npm", "start"]
+CMD ["node", "dist/src/index.js"]
