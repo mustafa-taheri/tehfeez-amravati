@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getCurrentAcademicMonth } from "../controllers/academic-month.controller";
+import { getCurrentAcademicMonth } from "../controllers/academic-month.controller.js";
 
 const router = Router();
 
