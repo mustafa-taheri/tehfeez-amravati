@@ -1,14 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, Alert } from 'react-native';
-import { Title, Button, Card, Text, Avatar, SegmentedButtons, ActivityIndicator, Appbar } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import apiClient from '../../api/client';
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, FlatList, Alert } from "react-native";
+import {
+  Title,
+  Button,
+  Card,
+  Text,
+  Avatar,
+  SegmentedButtons,
+  ActivityIndicator,
+  Appbar,
+} from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import apiClient from "../../api/client";
 
 export default function MarkAttendanceScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [students, setStudents] = useState<any[]>([]);
-  const [attendanceData, setAttendanceData] = useState<Record<string, string>>({});
+  const [attendanceData, setAttendanceData] = useState<Record<string, string>>(
+    {},
+  );
+  const [currentAcademicMonth, setCurrentAcademicMonth] = useState<any | null>(
+    null,
+  );
 
   useEffect(() => {
     fetchStudents();
@@ -17,58 +31,75 @@ export default function MarkAttendanceScreen({ navigation }: any) {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/students');
-      if (response.data.success) {
-        const studentList = response.data.data;
+      const [studentsResponse, monthResponse] = await Promise.all([
+        apiClient.get("/students"),
+        apiClient.get("/academic-months/current").catch(() => null),
+      ]);
+
+      if (studentsResponse.data.success) {
+        const studentList = studentsResponse.data.data;
         setStudents(studentList);
-        
-        // Initialize attendance to PRESENT for everyone
+
         const initialData: Record<string, string> = {};
         studentList.forEach((s: any) => {
-          initialData[s.id] = 'PRESENT';
+          initialData[s.id] = "PRESENT";
         });
         setAttendanceData(initialData);
       }
+
+      if (monthResponse?.data?.success) {
+        setCurrentAcademicMonth(monthResponse.data.data);
+      }
     } catch (error) {
-      console.error('Failed to fetch students', error);
-      Alert.alert('Error', 'Could not load student list. Please try again.');
+      console.error("Failed to fetch students", error);
+      Alert.alert("Error", "Could not load student list. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleStatusChange = (studentId: string, status: string) => {
-    setAttendanceData(prev => ({
+    setAttendanceData((prev) => ({
       ...prev,
-      [studentId]: status
+      [studentId]: status,
     }));
   };
 
   const submitAttendance = async () => {
     try {
       setSubmitting(true);
-      
-      const academicMonthId = "REPLACE_WITH_REAL_UUID"; // This needs to be fetched from active academic period API
+
+      if (!currentAcademicMonth?.id) {
+        Alert.alert(
+          "Error",
+          "No active academic month is available right now.",
+        );
+        return;
+      }
+
+      const academicMonthId = currentAcademicMonth.id;
       const today = new Date().toISOString();
 
-      // Submit attendance for each student
-      // In a production app with many students, a bulk-create endpoint is better, but doing it in loop for MVP based on existing API.
-      const promises = students.map((student) => 
-        apiClient.post('/attendance/student', {
-          studentId: student.id,
-          academicMonthId: academicMonthId,
-          attendanceDate: today,
-          attendanceStatus: attendanceData[student.id]
-        }).catch(e => console.log('Error marking for', student.id, e.response?.data))
+      const promises = students.map((student) =>
+        apiClient
+          .post("/attendance/student", {
+            studentId: student.id,
+            academicMonthId,
+            attendanceDate: today,
+            attendanceStatus: attendanceData[student.id],
+          })
+          .catch((e: any) =>
+            console.log("Error marking for", student.id, e.response?.data),
+          ),
       );
 
       await Promise.all(promises);
-      
-      Alert.alert('Success', 'Attendance has been recorded successfully.', [
-        { text: 'OK', onPress: () => navigation.goBack() }
+
+      Alert.alert("Success", "Attendance has been recorded successfully.", [
+        { text: "OK", onPress: () => navigation.goBack() },
       ]);
     } catch (error) {
-      Alert.alert('Error', 'Failed to submit attendance.');
+      Alert.alert("Error", "Failed to submit attendance.");
     } finally {
       setSubmitting(false);
     }
@@ -78,9 +109,18 @@ export default function MarkAttendanceScreen({ navigation }: any) {
     <Card style={styles.studentCard}>
       <Card.Content>
         <View style={styles.studentHeader}>
-          <Avatar.Text size={40} label={item.firstName.charAt(0) + (item.lastName ? item.lastName.charAt(0) : '')} style={styles.avatar} />
+          <Avatar.Text
+            size={40}
+            label={
+              item.firstName.charAt(0) +
+              (item.lastName ? item.lastName.charAt(0) : "")
+            }
+            style={styles.avatar}
+          />
           <View style={styles.studentInfo}>
-            <Text style={styles.studentName}>{item.firstName} {item.lastName}</Text>
+            <Text style={styles.studentName}>
+              {item.firstName} {item.lastName}
+            </Text>
             <Text style={styles.itsNumber}>ITS: {item.itsNumber}</Text>
           </View>
         </View>
@@ -89,10 +129,42 @@ export default function MarkAttendanceScreen({ navigation }: any) {
           value={attendanceData[item.id]}
           onValueChange={(value) => handleStatusChange(item.id, value)}
           buttons={[
-            { value: 'PRESENT', label: 'P', checkedColor: 'white', style: attendanceData[item.id] === 'PRESENT' ? {backgroundColor: '#4CAF50'} : {}},
-            { value: 'ABSENT', label: 'A', checkedColor: 'white', style: attendanceData[item.id] === 'ABSENT' ? {backgroundColor: '#F44336'} : {}},
-            { value: 'LEAVE', label: 'L', checkedColor: 'white', style: attendanceData[item.id] === 'LEAVE' ? {backgroundColor: '#FF9800'} : {}},
-            { value: 'UZUR', label: 'U', checkedColor: 'white', style: attendanceData[item.id] === 'UZUR' ? {backgroundColor: '#9C27B0'} : {}},
+            {
+              value: "PRESENT",
+              label: "P",
+              checkedColor: "white",
+              style:
+                attendanceData[item.id] === "PRESENT"
+                  ? { backgroundColor: "#4CAF50" }
+                  : {},
+            },
+            {
+              value: "ABSENT",
+              label: "A",
+              checkedColor: "white",
+              style:
+                attendanceData[item.id] === "ABSENT"
+                  ? { backgroundColor: "#F44336" }
+                  : {},
+            },
+            {
+              value: "LEAVE",
+              label: "L",
+              checkedColor: "white",
+              style:
+                attendanceData[item.id] === "LEAVE"
+                  ? { backgroundColor: "#FF9800" }
+                  : {},
+            },
+            {
+              value: "UZUR",
+              label: "U",
+              checkedColor: "white",
+              style:
+                attendanceData[item.id] === "UZUR"
+                  ? { backgroundColor: "#9C27B0" }
+                  : {},
+            },
           ]}
           style={styles.segmentedButtons}
         />
@@ -101,7 +173,7 @@ export default function MarkAttendanceScreen({ navigation }: any) {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Appbar.Header style={styles.appBar}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Mark Attendance" />
@@ -143,10 +215,10 @@ export default function MarkAttendanceScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
+    backgroundColor: "#F7F9FC",
   },
   appBar: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     elevation: 2,
   },
   container: {
@@ -154,25 +226,25 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   dateHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 15,
     paddingHorizontal: 5,
   },
   dateText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   totalText: {
     fontSize: 16,
-    color: '#666',
-    fontWeight: '600',
+    color: "#666",
+    fontWeight: "600",
   },
   loader: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   listContent: {
     paddingBottom: 20,
@@ -180,28 +252,28 @@ const styles = StyleSheet.create({
   studentCard: {
     marginBottom: 12,
     elevation: 2,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
   },
   studentHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 15,
   },
   avatar: {
-    backgroundColor: '#3F51B5',
+    backgroundColor: "#3F51B5",
   },
   studentInfo: {
     marginLeft: 15,
   },
   studentName: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   itsNumber: {
     fontSize: 13,
-    color: '#777',
+    color: "#777",
     marginTop: 2,
   },
   segmentedButtons: {
@@ -214,5 +286,5 @@ const styles = StyleSheet.create({
   },
   submitButtonContent: {
     paddingVertical: 8,
-  }
+  },
 });

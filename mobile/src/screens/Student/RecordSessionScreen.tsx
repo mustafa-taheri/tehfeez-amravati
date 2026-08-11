@@ -1,32 +1,66 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { TextInput, Button, Title, Appbar, SegmentedButtons } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import apiClient from '../../api/client';
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, ScrollView, Alert } from "react-native";
+import {
+  TextInput,
+  Button,
+  Title,
+  Appbar,
+  SegmentedButtons,
+} from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import apiClient from "../../api/client";
 
 export default function RecordSessionScreen({ route, navigation }: any) {
   const { studentId, student } = route.params;
   const [loading, setLoading] = useState(false);
-  
+  const [currentAcademicMonth, setCurrentAcademicMonth] = useState<any | null>(
+    null,
+  );
+
   // Form state
-  const [sessionType, setSessionType] = useState('MIXED');
-  const [surahName, setSurahName] = useState('');
-  const [siparaNumber, setSiparaNumber] = useState('');
-  const [hifzProgress, setHifzProgress] = useState('');
-  const [remarks, setRemarks] = useState('');
+  const [sessionType, setSessionType] = useState("MIXED");
+  const [surahName, setSurahName] = useState("");
+  const [siparaNumber, setSiparaNumber] = useState("");
+  const [hifzProgress, setHifzProgress] = useState("");
+  const [remarks, setRemarks] = useState("");
+
+  useEffect(() => {
+    fetchCurrentAcademicMonth();
+  }, []);
+
+  const fetchCurrentAcademicMonth = async () => {
+    try {
+      const response = await apiClient.get("/academic-months/current");
+      if (response.data.success) {
+        setCurrentAcademicMonth(response.data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch academic month", error);
+    }
+  };
 
   const submitSession = async () => {
     if (!surahName && !hifzProgress) {
-      Alert.alert('Validation', 'Please provide Surah Name or Hifz Progress at least.');
+      Alert.alert(
+        "Validation",
+        "Please provide Surah Name or Hifz Progress at least.",
+      );
       return;
     }
 
     try {
+      if (!currentAcademicMonth?.id) {
+        Alert.alert(
+          "Error",
+          "No active academic month is available right now.",
+        );
+        return;
+      }
+
       setLoading(true);
-      const academicMonthId = "REPLACE_WITH_REAL_UUID"; // Needs actual logic or context
       const payload = {
         studentId,
-        academicMonthId,
+        academicMonthId: currentAcademicMonth.id,
         sessionDate: new Date().toISOString(),
         sessionType,
         surahName,
@@ -35,39 +69,42 @@ export default function RecordSessionScreen({ route, navigation }: any) {
         remarks,
       };
 
-      const response = await apiClient.post('/quran-sessions', payload);
-      
+      const response = await apiClient.post("/quran-sessions", payload);
+
       if (response.data.success) {
-        Alert.alert('Success', 'Quran session recorded successfully.', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+        Alert.alert("Success", "Quran session recorded successfully.", [
+          { text: "OK", onPress: () => navigation.goBack() },
         ]);
       }
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to record session.');
+      Alert.alert("Error", "Failed to record session.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Appbar.Header style={styles.appBar}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Record Session" subtitle={`${student.firstName} ${student.lastName}`} />
+        <Appbar.Content
+          title="Record Session"
+          subtitle={`${student.firstName} ${student.lastName}`}
+        />
       </Appbar.Header>
 
       <ScrollView contentContainerStyle={styles.container}>
         <Title style={styles.sectionTitle}>Session Details</Title>
-        
+
         <View style={styles.segmentContainer}>
           <SegmentedButtons
             value={sessionType}
             onValueChange={setSessionType}
             buttons={[
-              { value: 'HIFZ', label: 'Hifz' },
-              { value: 'MURAJAAH', label: 'Murajaah' },
-              { value: 'MIXED', label: 'Mixed' },
+              { value: "HIFZ", label: "Hifz" },
+              { value: "MURAJAAH", label: "Murajaah" },
+              { value: "MIXED", label: "Mixed" },
             ]}
           />
         </View>
@@ -107,9 +144,9 @@ export default function RecordSessionScreen({ route, navigation }: any) {
           style={styles.input}
         />
 
-        <Button 
-          mode="contained" 
-          onPress={submitSession} 
+        <Button
+          mode="contained"
+          onPress={submitSession}
           loading={loading}
           disabled={loading}
           style={styles.submitButton}
@@ -125,10 +162,10 @@ export default function RecordSessionScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   appBar: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     elevation: 2,
   },
   container: {
@@ -137,19 +174,19 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    color: '#333',
+    color: "#333",
   },
   segmentContainer: {
     marginBottom: 20,
   },
   input: {
     marginBottom: 15,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   submitButton: {
     marginTop: 20,
     borderRadius: 8,
-  }
+  },
 });

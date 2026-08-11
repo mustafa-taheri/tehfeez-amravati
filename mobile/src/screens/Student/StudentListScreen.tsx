@@ -1,12 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { Title, Card, Text, Avatar, Searchbar, Appbar, ActivityIndicator } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import apiClient from '../../api/client';
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import {
+  Title,
+  Card,
+  Text,
+  Avatar,
+  Searchbar,
+  Appbar,
+  ActivityIndicator,
+} from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import apiClient from "../../api/client";
 
 export default function StudentListScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [students, setStudents] = useState<any[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<any[]>([]);
 
@@ -17,13 +25,13 @@ export default function StudentListScreen({ navigation }: any) {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/students');
+      const response = await apiClient.get("/students");
       if (response.data.success) {
         setStudents(response.data.data);
         setFilteredStudents(response.data.data);
       }
     } catch (error) {
-      console.error('Failed to fetch students', error);
+      console.error("Failed to fetch students", error);
     } finally {
       setLoading(false);
     }
@@ -34,10 +42,10 @@ export default function StudentListScreen({ navigation }: any) {
     if (query) {
       const lowercased = query.toLowerCase();
       const filtered = students.filter(
-        s => 
-          s.firstName.toLowerCase().includes(lowercased) || 
+        (s) =>
+          s.firstName.toLowerCase().includes(lowercased) ||
           (s.lastName && s.lastName.toLowerCase().includes(lowercased)) ||
-          s.itsNumber.includes(query)
+          s.itsNumber.includes(query),
       );
       setFilteredStudents(filtered);
     } else {
@@ -46,21 +54,34 @@ export default function StudentListScreen({ navigation }: any) {
   };
 
   const renderStudentItem = ({ item }: { item: any }) => (
-    <TouchableOpacity onPress={() => navigation.navigate('StudentDetail', { studentId: item.id, student: item })}>
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate("StudentDetail", {
+          studentId: item.id,
+          student: item,
+        })
+      }
+    >
       <Card style={styles.studentCard}>
         <Card.Content style={styles.cardContent}>
-          <Avatar.Text size={45} label={item.firstName.charAt(0)} style={styles.avatar} />
+          <Avatar.Text
+            size={45}
+            label={item.firstName.charAt(0)}
+            style={styles.avatar}
+          />
           <View style={styles.studentInfo}>
-            <Text style={styles.studentName}>{item.firstName} {item.lastName}</Text>
+            <Text style={styles.studentName}>
+              {item.firstName} {item.lastName}
+            </Text>
             <Text style={styles.itsNumber}>ITS: {item.itsNumber}</Text>
           </View>
-        </View>
-      </Card.Content>
-    </Card>
+        </Card.Content>
+      </Card>
+    </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Appbar.Header style={styles.appBar}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Students" />
@@ -97,10 +118,10 @@ export default function StudentListScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
+    backgroundColor: "#F7F9FC",
   },
   appBar: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     elevation: 2,
   },
   container: {
@@ -109,12 +130,12 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     marginBottom: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 10,
   },
   loader: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   listContent: {
     paddingBottom: 20,
@@ -122,34 +143,34 @@ const styles = StyleSheet.create({
   studentCard: {
     marginBottom: 12,
     elevation: 2,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
   },
   cardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   avatar: {
-    backgroundColor: '#009688',
+    backgroundColor: "#009688",
   },
   studentInfo: {
     marginLeft: 15,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   studentName: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   itsNumber: {
     fontSize: 13,
-    color: '#777',
+    color: "#777",
     marginTop: 2,
   },
   emptyText: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 30,
-    color: '#888',
+    color: "#888",
     fontSize: 16,
-  }
+  },
 });
