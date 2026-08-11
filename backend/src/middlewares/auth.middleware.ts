@@ -1,8 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import { verifyToken, TokenPayload } from '../utils/jwt';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import type { Request, Response, NextFunction } from 'express';
+import { verifyToken } from '../utils/jwt';
+import type { TokenPayload } from '../utils/jwt';
+import { prisma } from '../utils/db';
 
 export interface AuthRequest extends Request {
   user?: TokenPayload & { isActive?: boolean };

@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from './utils/db';
 import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding initial data...');
@@ -16,11 +14,10 @@ async function main() {
         lastName: 'Admin',
         fullName: 'System Admin',
         username: 'admin',
+        mobileNumber: '0000000000',
         passwordHash,
         role: 'ADMIN',
         isActive: true,
-        createdBy: 'SYSTEM',
-        updatedBy: 'SYSTEM',
       }
     });
     console.log(`Created admin user: ${admin.username} / Password@123`);
@@ -30,12 +27,12 @@ async function main() {
 
   // Seed Marhalas
   const marhalas = [
-    { code: 'ULA', name: 'Marhala Ula' },
-    { code: 'SANIYAH', name: 'Marhala Saniyah' },
-    { code: 'SALESAH', name: 'Marhala Salesah' },
-    { code: 'RABEAH', name: 'Marhala Rabeah' },
-    { code: 'KHAMESAH', name: 'Marhala Khamesah' },
-    { code: 'SADESAH', name: 'Marhala Sadesa' },
+    { code: 'ULA', name: 'Marhala Ula', displayOrder: 1 },
+    { code: 'SANIYAH', name: 'Marhala Saniyah', displayOrder: 2 },
+    { code: 'SALESAH', name: 'Marhala Salesah', displayOrder: 3 },
+    { code: 'RABEAH', name: 'Marhala Rabeah', displayOrder: 4 },
+    { code: 'KHAMESAH', name: 'Marhala Khamesah', displayOrder: 5 },
+    { code: 'SADESAH', name: 'Marhala Sadesa', displayOrder: 6 },
   ];
 
   for (const m of marhalas) {
@@ -45,9 +42,8 @@ async function main() {
         data: {
           code: m.code as any,
           name: m.name,
+          displayOrder: m.displayOrder,
           description: m.name,
-          createdBy: 'SYSTEM',
-          updatedBy: 'SYSTEM',
         }
       });
       console.log(`Created Marhala: ${m.name}`);

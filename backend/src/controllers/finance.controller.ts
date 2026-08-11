@@ -1,8 +1,6 @@
-import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { AuthRequest } from '../middlewares/auth.middleware';
-
-const prisma = new PrismaClient();
+import type { Request, Response } from 'express';
+import { prisma } from '../utils/db';
+import type { AuthRequest } from '../middlewares/auth.middleware';
 
 // ------------------------------------------------------------------
 // Student Fee Collection
