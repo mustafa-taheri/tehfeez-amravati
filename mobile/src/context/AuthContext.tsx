@@ -21,6 +21,7 @@ type AuthContextType = {
     role: string,
     userData?: UserProfile,
   ) => Promise<void>;
+  updateUser: (userData: UserProfile) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -30,6 +31,7 @@ export const AuthContext = createContext<AuthContextType>({
   userRole: null,
   user: null,
   signIn: async () => {},
+  updateUser: async () => {},
   signOut: async () => {},
 });
 
@@ -72,6 +74,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(userData ?? null);
   };
 
+  const updateUser = async (userData: UserProfile) => {
+    await AsyncStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
+  };
+
   const signOut = async () => {
     await AsyncStorage.removeItem("accessToken");
     await AsyncStorage.removeItem("refreshToken");
@@ -84,7 +91,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isLoading, userToken, userRole, user, signIn, signOut }}
+      value={{
+        isLoading,
+        userToken,
+        userRole,
+        user,
+        signIn,
+        updateUser,
+        signOut,
+      }}
     >
       {children}
     </AuthContext.Provider>

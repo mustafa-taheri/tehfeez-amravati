@@ -19,9 +19,20 @@ export default function RecordSessionScreen({ route, navigation }: any) {
 
   // Form state
   const [sessionType, setSessionType] = useState("MIXED");
+  const [sessionDate, setSessionDate] = useState(
+    new Date().toISOString().slice(0, 10),
+  );
   const [surahName, setSurahName] = useState("");
   const [siparaNumber, setSiparaNumber] = useState("");
+  const [startAyah, setStartAyah] = useState("");
+  const [endAyah, setEndAyah] = useState("");
   const [hifzProgress, setHifzProgress] = useState("");
+  const [murajaahJuz, setMurajaahJuz] = useState("");
+  const [murajaahMarks, setMurajaahMarks] = useState("");
+  const [juzHaaliMarks, setJuzHaaliMarks] = useState("");
+  const [jadeedStartAyah, setJadeedStartAyah] = useState("");
+  const [jadeedEndAyah, setJadeedEndAyah] = useState("");
+  const [tasmeeMarks, setTasmeeMarks] = useState("");
   const [remarks, setRemarks] = useState("");
 
   useEffect(() => {
@@ -40,6 +51,14 @@ export default function RecordSessionScreen({ route, navigation }: any) {
   };
 
   const submitSession = async () => {
+    if (!sessionDate || !sessionType) {
+      Alert.alert(
+        "Validation",
+        "Please provide a session date and session type.",
+      );
+      return;
+    }
+
     if (!surahName && !hifzProgress) {
       Alert.alert(
         "Validation",
@@ -61,11 +80,21 @@ export default function RecordSessionScreen({ route, navigation }: any) {
       const payload = {
         studentId,
         academicMonthId: currentAcademicMonth.id,
-        sessionDate: new Date().toISOString(),
+        sessionDate: new Date(sessionDate).toISOString(),
         sessionType,
         surahName,
         siparaNumber: siparaNumber ? parseInt(siparaNumber, 10) : undefined,
+        startAyah: startAyah ? parseInt(startAyah, 10) : undefined,
+        endAyah: endAyah ? parseInt(endAyah, 10) : undefined,
         hifzProgress,
+        murajaahJuz: murajaahJuz ? parseInt(murajaahJuz, 10) : undefined,
+        murajaahMarks: murajaahMarks ? parseInt(murajaahMarks, 10) : undefined,
+        juzHaaliMarks: juzHaaliMarks ? parseInt(juzHaaliMarks, 10) : undefined,
+        jadeedStartAyah: jadeedStartAyah
+          ? parseInt(jadeedStartAyah, 10)
+          : undefined,
+        jadeedEndAyah: jadeedEndAyah ? parseInt(jadeedEndAyah, 10) : undefined,
+        tasmeeMarks: tasmeeMarks ? parseInt(tasmeeMarks, 10) : undefined,
         remarks,
       };
 
@@ -110,6 +139,15 @@ export default function RecordSessionScreen({ route, navigation }: any) {
         </View>
 
         <TextInput
+          label="Session Date (YYYY-MM-DD)"
+          value={sessionDate}
+          onChangeText={setSessionDate}
+          mode="outlined"
+          style={styles.input}
+          placeholder="2026-08-12"
+        />
+
+        <TextInput
           label="Surah Name"
           value={surahName}
           onChangeText={setSurahName}
@@ -127,9 +165,81 @@ export default function RecordSessionScreen({ route, navigation }: any) {
         />
 
         <TextInput
+          label="Starting Ayah"
+          value={startAyah}
+          onChangeText={setStartAyah}
+          keyboardType="numeric"
+          mode="outlined"
+          style={styles.input}
+        />
+
+        <TextInput
+          label="Ending Ayah"
+          value={endAyah}
+          onChangeText={setEndAyah}
+          keyboardType="numeric"
+          mode="outlined"
+          style={styles.input}
+        />
+
+        <TextInput
           label="Hifz Progress (e.g., 2 pages, Ayah 1-15)"
           value={hifzProgress}
           onChangeText={setHifzProgress}
+          mode="outlined"
+          style={styles.input}
+        />
+
+        <TextInput
+          label="Murajaah Juz"
+          value={murajaahJuz}
+          onChangeText={setMurajaahJuz}
+          keyboardType="numeric"
+          mode="outlined"
+          style={styles.input}
+        />
+
+        <TextInput
+          label="Murajaah Marks"
+          value={murajaahMarks}
+          onChangeText={setMurajaahMarks}
+          keyboardType="numeric"
+          mode="outlined"
+          style={styles.input}
+        />
+
+        <TextInput
+          label="Juz Haali Marks"
+          value={juzHaaliMarks}
+          onChangeText={setJuzHaaliMarks}
+          keyboardType="numeric"
+          mode="outlined"
+          style={styles.input}
+        />
+
+        <TextInput
+          label="Jadeed Starting Ayah"
+          value={jadeedStartAyah}
+          onChangeText={setJadeedStartAyah}
+          keyboardType="numeric"
+          mode="outlined"
+          style={styles.input}
+        />
+
+        <TextInput
+          label="Jadeed Ending Ayah"
+          value={jadeedEndAyah}
+          onChangeText={setJadeedEndAyah}
+          keyboardType="numeric"
+          mode="outlined"
+          style={styles.input}
+        />
+
+        <TextInput
+          label="Tasmee Marks"
+          value={tasmeeMarks}
+          onChangeText={setTasmeeMarks}
+          keyboardType="numeric"
           mode="outlined"
           style={styles.input}
         />

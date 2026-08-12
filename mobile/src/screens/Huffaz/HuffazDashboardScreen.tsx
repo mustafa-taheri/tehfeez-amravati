@@ -166,7 +166,7 @@ export default function HuffazDashboardScreen({ navigation }: any) {
                 title="My Profile"
                 icon="card-account-details"
                 color="#607D8B"
-                onPress={() => console.log("Navigate to My Profile")}
+                onPress={() => navigation.navigate("Profile")}
               />
             </View>
 
