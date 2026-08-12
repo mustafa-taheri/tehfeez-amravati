@@ -1,8 +1,11 @@
-import type { Request, Response } from 'express';
-import { prisma } from '../utils/db';
-import type { AuthRequest } from '../middlewares/auth.middleware';
+import type { Request, Response } from "express";
+import { prisma } from "../utils/db.js";
+import type { AuthRequest } from "../middlewares/auth.middleware.js";
 
-export const recordQuranSession = async (req: AuthRequest, res: Response): Promise<void> => {
+export const recordQuranSession = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
   try {
     const {
       studentId,
@@ -25,7 +28,13 @@ export const recordQuranSession = async (req: AuthRequest, res: Response): Promi
     } = req.body;
 
     if (!studentId || !academicMonthId || !sessionDate || !sessionType) {
-      res.status(400).json({ success: false, message: 'Validation failed: studentId, academicMonthId, sessionDate, sessionType are required.' });
+      res
+        .status(400)
+        .json({
+          success: false,
+          message:
+            "Validation failed: studentId, academicMonthId, sessionDate, sessionType are required.",
+        });
       return;
     }
 
@@ -50,21 +59,36 @@ export const recordQuranSession = async (req: AuthRequest, res: Response): Promi
         durationMinutes,
         remarks,
         recordedBy: req.user!.userId,
-      }
+      },
     });
 
-    res.status(201).json({ success: true, message: 'Quran session recorded successfully.', data: session });
+    res
+      .status(201)
+      .json({
+        success: true,
+        message: "Quran session recorded successfully.",
+        data: session,
+      });
   } catch (error: any) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Internal server error.', code: 'INTERNAL_SERVER_ERROR' });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Internal server error.",
+        code: "INTERNAL_SERVER_ERROR",
+      });
   }
 };
 
-export const getQuranSessions = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getQuranSessions = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 20;
-    
+
     const { studentId, userId, sessionDate, academicMonthId } = req.query;
 
     const where: any = { isActive: true };
@@ -78,17 +102,17 @@ export const getQuranSessions = async (req: AuthRequest, res: Response): Promise
       where,
       skip: (page - 1) * pageSize,
       take: pageSize,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         huffaz: {
-          select: { id: true, firstName: true, lastName: true }
-        }
-      }
+          select: { id: true, firstName: true, lastName: true },
+        },
+      },
     });
 
     res.status(200).json({
       success: true,
-      message: 'Quran sessions retrieved successfully.',
+      message: "Quran sessions retrieved successfully.",
       data: sessions,
       meta: {
         page,
@@ -97,10 +121,16 @@ export const getQuranSessions = async (req: AuthRequest, res: Response): Promise
         totalPages: Math.ceil(totalRecords / pageSize),
         hasNextPage: page * pageSize < totalRecords,
         hasPreviousPage: page > 1,
-      }
+      },
     });
   } catch (error: any) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Internal server error.', code: 'INTERNAL_SERVER_ERROR' });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Internal server error.",
+        code: "INTERNAL_SERVER_ERROR",
+      });
   }
 };

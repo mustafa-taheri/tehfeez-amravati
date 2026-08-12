@@ -15,12 +15,13 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-import authRouter from "./routes/auth.routes";
-import studentRouter from "./routes/student.routes";
-import attendanceRouter from "./routes/attendance.routes";
-import quranSessionRouter from "./routes/quran-session.routes";
-import financeRouter from "./routes/finance.routes";
-import academicMonthRouter from "./routes/academic-month.routes";
+import authRouter from "./routes/auth.routes.js";
+import studentRouter from "./routes/student.routes.js";
+import attendanceRouter from "./routes/attendance.routes.js";
+import quranSessionRouter from "./routes/quran-session.routes.js";
+import financeRouter from "./routes/finance.routes.js";
+import huffazRouter from "./routes/huffaz.routes.js";
+import academicMonthRouter from "./routes/academic-month.routes.js";
 
 // TODO: Add routers here
 app.use("/api/v1/auth", authRouter);
@@ -28,6 +29,7 @@ app.use("/api/v1/students", studentRouter);
 app.use("/api/v1/attendance", attendanceRouter);
 app.use("/api/v1/quran-sessions", quranSessionRouter);
 app.use("/api/v1/finance", financeRouter);
+app.use("/api/v1/huffaz", huffazRouter);
 app.use("/api/v1/academic-months", academicMonthRouter);
 
 app.use((req, res, next) => {

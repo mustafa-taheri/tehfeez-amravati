@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { prisma } from "../utils/db";
+import { prisma } from "../utils/db.js";
 
 export const getCurrentAcademicMonth = async (
   _req: Request,
@@ -32,12 +32,10 @@ export const getCurrentAcademicMonth = async (
     });
   } catch (error: any) {
     console.error("getCurrentAcademicMonth error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
   }
 };
