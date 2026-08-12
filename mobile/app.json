@@ -20,6 +20,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "splash": {
+      "image": "./assets/pngegg.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "extra": {
+      "API_URL": "http://10.185.220.222:5000/api/v1"
     }
   }
 }

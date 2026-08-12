@@ -1,4 +1,4 @@
-<!-- @AGENTS.md
+@AGENTS.md
 Approach
 
 Read existing files before writing. Don't re-read unless changed.
@@ -41,4 +41,4 @@ Simple Formatting
 No em dashes, smart quotes, or decorative Unicode symbols.
 Plain hyphens and straight quotes only.
 Natural language characters (accented letters, CJK, etc.) are fine when the content requires them.
-Code output must be copy-paste safe. -->
+Code output must be copy-paste safe.
