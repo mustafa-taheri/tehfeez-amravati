@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import { TextInput, Button, Appbar, ActivityIndicator, Text } from "react-native-paper";
+import {
+  TextInput,
+  Button,
+  Appbar,
+  ActivityIndicator,
+  Text,
+} from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
 
@@ -17,7 +23,10 @@ export default function ChangePasswordScreen({ navigation }: any) {
       return;
     }
     if (newPassword !== confirmPassword) {
-      Alert.alert("Validation", "New password and confirm password do not match.");
+      Alert.alert(
+        "Validation",
+        "New password and confirm password do not match.",
+      );
       return;
     }
 
@@ -39,7 +48,9 @@ export default function ChangePasswordScreen({ navigation }: any) {
       }
     } catch (updateError: any) {
       console.error("ChangePassword error:", updateError);
-      setError(updateError.response?.data?.message || "Unable to update password.");
+      setError(
+        updateError.response?.data?.message || "Unable to update password.",
+      );
     } finally {
       setLoading(false);
     }

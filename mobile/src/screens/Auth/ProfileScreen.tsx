@@ -1,6 +1,14 @@
 import React, { useEffect, useState, useContext } from "react";
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
-import { TextInput, Button, Title, Appbar, ActivityIndicator, Text, Avatar } from "react-native-paper";
+import {
+  TextInput,
+  Button,
+  Title,
+  Appbar,
+  ActivityIndicator,
+  Text,
+  Avatar,
+} from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
 import { AuthContext } from "../../context/AuthContext";
@@ -70,7 +78,10 @@ export default function ProfileScreen({ navigation }: any) {
         updateUser(updatedUser);
         Alert.alert("Success", "Profile updated successfully.");
       } else {
-        Alert.alert("Error", response.data.message || "Could not update profile.");
+        Alert.alert(
+          "Error",
+          response.data.message || "Could not update profile.",
+        );
       }
     } catch (updateError: any) {
       console.error("saveProfile error:", updateError);
