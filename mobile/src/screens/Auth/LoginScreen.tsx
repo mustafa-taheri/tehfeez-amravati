@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Image } from "react-native";
 import { TextInput, Button, Title, Text } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
@@ -27,12 +27,14 @@ export default function LoginScreen({ navigation }: any) {
         username,
         password,
       });
+      console.log("Login response:", response.data);
 
       if (response.data.success) {
         const { user, tokens } = response.data.data;
         await signIn(tokens.accessToken, user.role, user);
       }
     } catch (err: any) {
+      console.log("Login error:", err);
       setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
@@ -42,7 +44,12 @@ export default function LoginScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Title style={styles.title}>Quran Tehfeez Management</Title>
+        <Image
+          source={require("../../../assets/pngegg.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <Title style={styles.title}>Qism Al Tehfeez Amravati</Title>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -87,6 +94,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: "center",
+  },
+  logo: {
+    width: 140,
+    height: 140,
+    alignSelf: "center",
+    marginBottom: 20,
   },
   title: {
     textAlign: "center",
