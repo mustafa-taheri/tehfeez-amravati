@@ -684,6 +684,79 @@ export const getFinanceReport = async (
   }
 };
 
+export const getHuffazPayables = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const academicMonthId =
+      typeof req.query.academicMonthId === "string"
+        ? req.query.academicMonthId
+        : undefined;
+    if (!academicMonthId) {
+      res
+        .status(400)
+        .json({ success: false, message: "academicMonthId is required." });
+      return;
+    }
+
+    const academicMonth = await prisma.academicMonth.findUnique({
+      where: { id: academicMonthId },
+    });
+    if (!academicMonth) {
+      res.status(404).json({
+        success: false,
+        message: "Academic month not found.",
+        code: "RESOURCE_NOT_FOUND",
+      });
+      return;
+    }
+
+    const feeCollections = await prisma.studentFeeCollection.findMany({
+      where: { academicMonthId, isActive: true },
+    });
+
+    const totalCollectedAmount = roundToTwo(
+      feeCollections.reduce(
+        (sum, collection) => sum + Number(collection.totalReceivedAmount),
+        0,
+      ),
+    );
+
+    const workingDays = academicMonth.workingDays || 30;
+    const dailyPool =
+      workingDays > 0 ? roundToTwo(totalCollectedAmount / workingDays) : 0;
+
+    const attendanceRecords = await prisma.huffazAttendance.findMany({
+      where: { academicMonthId },
+      orderBy: { attendanceDate: "asc" },
+    });
+
+    const activeHuffaz = await prisma.user.findMany({
+      where: { role: "HUFFAZ", isActive: true },
+      select: { id: true, fullName: true },
+    });
+
+    const huffazPayables = buildHuffazPayables(
+      activeHuffaz,
+      attendanceRecords,
+      dailyPool,
+      workingDays,
+    );
+
+    res
+      .status(200)
+      .json({ success: true, data: { dailyPool, huffazPayables } });
+  } catch (error: any) {
+    console.error("getHuffazPayables error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
 export const generateMonthlySettlement = async (
   req: AuthRequest,
   res: Response,

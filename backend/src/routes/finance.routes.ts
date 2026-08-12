@@ -7,6 +7,7 @@ import {
   getMonthlySettlements,
   getMonthlySettlementById,
   getFinanceReport,
+  getHuffazPayables,
   generateMonthlySettlement,
   addSettlementAdjustment,
   lockMonthlySettlement,
@@ -27,6 +28,7 @@ router.get("/fee-collections", authorize(["ADMIN"]), getFeeCollections);
 router.get("/settlements", authorize(["ADMIN"]), getMonthlySettlements);
 router.get("/settlements/:id", authorize(["ADMIN"]), getMonthlySettlementById);
 router.get("/reports", authorize(["ADMIN"]), getFinanceReport);
+router.get("/payables", authorize(["ADMIN"]), getHuffazPayables);
 router.post(
   "/settlements/generate",
   authorize(["ADMIN"]),

@@ -22,6 +22,7 @@ import quranSessionRouter from "./routes/quran-session.routes.js";
 import financeRouter from "./routes/finance.routes.js";
 import huffazRouter from "./routes/huffaz.routes.js";
 import academicMonthRouter from "./routes/academic-month.routes.js";
+import marhalaRouter from "./routes/marhala.routes.js";
 
 // TODO: Add routers here
 app.use("/api/v1/auth", authRouter);
@@ -31,6 +32,7 @@ app.use("/api/v1/quran-sessions", quranSessionRouter);
 app.use("/api/v1/finance", financeRouter);
 app.use("/api/v1/huffaz", huffazRouter);
 app.use("/api/v1/academic-months", academicMonthRouter);
+app.use("/api/v1/marhalas", marhalaRouter);
 
 app.use((req, res, next) => {
   res.status(404).json({ error: "Endpoint not found" });

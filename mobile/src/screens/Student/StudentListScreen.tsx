@@ -8,6 +8,7 @@ import {
   Searchbar,
   Appbar,
   ActivityIndicator,
+  Button,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
@@ -85,6 +86,14 @@ export default function StudentListScreen({ navigation }: any) {
       <Appbar.Header style={styles.appBar}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Students" />
+        <Button
+          mode="contained"
+          onPress={() => navigation.navigate("StudentForm", { student: null })}
+          compact
+          style={styles.addButton}
+        >
+          Add
+        </Button>
       </Appbar.Header>
 
       <View style={styles.container}>
@@ -123,6 +132,11 @@ const styles = StyleSheet.create({
   appBar: {
     backgroundColor: "#fff",
     elevation: 2,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  addButton: {
+    marginRight: 10,
   },
   container: {
     flex: 1,

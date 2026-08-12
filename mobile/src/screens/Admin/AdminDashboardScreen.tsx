@@ -162,13 +162,19 @@ export default function AdminDashboardScreen({ navigation }: any) {
                 title="Manage Huffaz"
                 icon="account-tie"
                 color="#FF9800"
-                onPress={() => console.log("Navigate to Manage Huffaz")}
+                onPress={() => navigation.navigate("HuffazList")}
+              />
+              <ActionButton
+                title="Attendance Report"
+                icon="calendar-text"
+                color="#3F51B5"
+                onPress={() => navigation.navigate("AttendanceReport")}
               />
               <ActionButton
                 title="Reports"
                 icon="chart-bar"
-                color="#3F51B5"
-                onPress={() => console.log("Navigate to Reports")}
+                color="#673AB7"
+                onPress={() => navigation.navigate("FinanceReport")}
               />
             </View>
 
