@@ -757,6 +757,136 @@ export const getHuffazPayables = async (
   }
 };
 
+export const getMyHuffazPayable = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+        code: "UNAUTHORIZED",
+      });
+      return;
+    }
+
+    const academicMonthId =
+      typeof req.query.academicMonthId === "string"
+        ? req.query.academicMonthId
+        : undefined;
+
+    const academicMonth = academicMonthId
+      ? await prisma.academicMonth.findUnique({
+          where: { id: academicMonthId },
+        })
+      : await prisma.academicMonth.findFirst({
+          where: { isActive: true },
+          orderBy: [{ isCurrent: "desc" }, { startDate: "desc" }],
+        });
+
+    if (!academicMonth) {
+      res.status(404).json({
+        success: false,
+        message: "Academic month not found.",
+        code: "RESOURCE_NOT_FOUND",
+      });
+      return;
+    }
+
+    const feeCollections = await prisma.studentFeeCollection.findMany({
+      where: { academicMonthId: academicMonth.id, isActive: true },
+    });
+
+    const totalCollectedAmount = roundToTwo(
+      feeCollections.reduce(
+        (sum, collection) => sum + Number(collection.totalReceivedAmount),
+        0,
+      ),
+    );
+
+    const workingDays = academicMonth.workingDays || 30;
+    const dailyPool =
+      workingDays > 0 ? roundToTwo(totalCollectedAmount / workingDays) : 0;
+
+    const attendanceRecords = await prisma.huffazAttendance.findMany({
+      where: { academicMonthId: academicMonth.id, userId },
+      orderBy: { attendanceDate: "asc" },
+    });
+
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        fullName: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+
+    const huffazPayables = buildHuffazPayables(
+      [
+        {
+          id: userId,
+          fullName:
+            currentUser?.fullName ||
+            [currentUser?.firstName, currentUser?.lastName]
+              .filter(Boolean)
+              .join(" ") ||
+            "Huffaz",
+        },
+      ],
+      attendanceRecords,
+      dailyPool,
+      workingDays,
+    );
+
+    const myPayable = huffazPayables[0] || {
+      userId,
+      fullName: currentUser?.fullName || "Huffaz",
+      attendanceDays: 0,
+      attendancePercentage: 0,
+      calculatedAmount: 0,
+    };
+
+    const attendanceSummary = attendanceRecords.reduce(
+      (summary, record) => {
+        const [dateKey] = record.attendanceDate.toISOString().split("T");
+        if (dateKey) summary.days.add(dateKey);
+        summary.statusCounts[record.attendanceStatus] =
+          (summary.statusCounts[record.attendanceStatus] || 0) + 1;
+        return summary;
+      },
+      {
+        days: new Set<string>(),
+        statusCounts: {} as Record<string, number>,
+      },
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        academicMonth,
+        dailyPool,
+        myPayable,
+        attendanceSummary: {
+          totalRecords: attendanceRecords.length,
+          totalDays: attendanceSummary.days.size,
+          statusCounts: attendanceSummary.statusCounts,
+        },
+      },
+    });
+  } catch (error: any) {
+    console.error("getMyHuffazPayable error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
 export const generateMonthlySettlement = async (
   req: AuthRequest,
   res: Response,

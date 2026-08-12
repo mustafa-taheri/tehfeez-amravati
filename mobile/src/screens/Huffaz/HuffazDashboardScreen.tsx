@@ -157,6 +157,12 @@ export default function HuffazDashboardScreen({ navigation }: any) {
                 onPress={() => navigation.navigate("StudentList")}
               />
               <ActionButton
+                title="My Monthly Settlement"
+                icon="cash-multiple"
+                color="#4CAF50"
+                onPress={() => navigation.navigate("MyMonthlySettlement")}
+              />
+              <ActionButton
                 title="My Profile"
                 icon="card-account-details"
                 color="#607D8B"
