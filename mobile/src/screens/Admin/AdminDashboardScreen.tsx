@@ -176,6 +176,12 @@ export default function AdminDashboardScreen({ navigation }: any) {
                 color="#673AB7"
                 onPress={() => navigation.navigate("FinanceReport")}
               />
+              <ActionButton
+                title="Academic Month"
+                icon="calendar-month"
+                color="#795548"
+                onPress={() => navigation.navigate("AcademicMonthForm")}
+              />
             </View>
 
             <Title style={styles.sectionTitle}>Recent Activity</Title>

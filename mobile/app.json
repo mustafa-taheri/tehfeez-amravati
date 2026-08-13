@@ -27,7 +27,7 @@
       "backgroundColor": "#ffffff"
     },
     "extra": {
-      "API_URL": "http://10.185.220.222:5000/api/v1"
+      "API_URL": "http://192.168.1.115:5000/api/v1"
     }
   }
 }

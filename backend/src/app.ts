@@ -24,7 +24,7 @@ import huffazRouter from "./routes/huffaz.routes.js";
 import academicMonthRouter from "./routes/academic-month.routes.js";
 import marhalaRouter from "./routes/marhala.routes.js";
 
-// TODO: Add routers here
+//Add routers here
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/students", studentRouter);
 app.use("/api/v1/attendance", attendanceRouter);
