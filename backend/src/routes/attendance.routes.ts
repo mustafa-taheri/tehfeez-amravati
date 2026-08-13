@@ -4,6 +4,7 @@ import {
   getStudentAttendance,
   markHuffazAttendance,
   getHuffazAttendance,
+  getHuffazAttendanceCount,
 } from "../controllers/attendance.controller.js";
 import { authenticate, authorize } from "../middlewares/auth.middleware.js";
 
@@ -20,5 +21,10 @@ router.get("/student", authorize(["ADMIN", "HUFFAZ"]), getStudentAttendance);
 // Only Admin can mark Huffaz attendance
 router.post("/huffaz", authorize(["ADMIN"]), markHuffazAttendance);
 router.get("/huffaz", authorize(["ADMIN"]), getHuffazAttendance);
+router.get(
+  "/huffaz/:id",
+  authorize(["ADMIN,HUFFAZ"]),
+  getHuffazAttendanceCount,
+);
 
 export default router;

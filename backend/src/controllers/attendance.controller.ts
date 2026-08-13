@@ -24,13 +24,11 @@ export const markStudentAttendance = async (
       !attendanceDate ||
       !attendanceStatus
     ) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: "Validation failed.",
-          errors: [{ field: "required", message: "Missing required fields" }],
-        });
+      res.status(400).json({
+        success: false,
+        message: "Validation failed.",
+        errors: [{ field: "required", message: "Missing required fields" }],
+      });
       return;
     }
 
@@ -44,13 +42,11 @@ export const markStudentAttendance = async (
     });
 
     if (existing) {
-      res
-        .status(409)
-        .json({
-          success: false,
-          message: "Attendance already marked for this date",
-          code: "DUPLICATE_RECORD",
-        });
+      res.status(409).json({
+        success: false,
+        message: "Attendance already marked for this date",
+        code: "DUPLICATE_RECORD",
+      });
       return;
     }
 
@@ -65,22 +61,18 @@ export const markStudentAttendance = async (
       },
     });
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Student attendance marked successfully",
-        data: attendance,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Student attendance marked successfully",
+      data: attendance,
+    });
   } catch (error: any) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
   }
 };
 
@@ -104,13 +96,11 @@ export const getStudentAttendance = async (
 
     res.status(200).json({ success: true, data: records });
   } catch (error: any) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
   }
 };
 
@@ -146,13 +136,11 @@ export const markHuffazAttendance = async (
     });
 
     if (existing) {
-      res
-        .status(409)
-        .json({
-          success: false,
-          message: "Attendance already marked for this date",
-          code: "DUPLICATE_RECORD",
-        });
+      res.status(409).json({
+        success: false,
+        message: "Attendance already marked for this date",
+        code: "DUPLICATE_RECORD",
+      });
       return;
     }
 
@@ -174,22 +162,18 @@ export const markHuffazAttendance = async (
       },
     });
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Huffaz attendance marked successfully",
-        data: attendance,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Huffaz attendance marked successfully",
+      data: attendance,
+    });
   } catch (error: any) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
   }
 };
 
@@ -213,12 +197,37 @@ export const getHuffazAttendance = async (
 
     res.status(200).json({ success: true, data: records });
   } catch (error: any) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+export const getHuffazAttendanceCount = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      res.status(400).json({ success: false, message: "User ID is required." });
+      return;
+    }
+
+    const count = await prisma.huffazAttendance.count({
+      where: { userId },
+    });
+
+    res.status(200).json({ success: true, data: { count } });
+  } catch (error: any) {
+    console.error("getHuffazAttendanceCount error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
   }
 };

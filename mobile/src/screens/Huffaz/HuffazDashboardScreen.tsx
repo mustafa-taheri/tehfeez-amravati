@@ -19,10 +19,25 @@ export default function HuffazDashboardScreen({ navigation }: any) {
     myStudents: 0,
     quranSessionsToday: 0,
   });
+  const [attendanceCount, setAttendanceCount] = useState<number | null>(null);
 
   useEffect(() => {
     fetchDashboardStats();
+    getHuffazAttendanceCount();
   }, []);
+
+  const getHuffazAttendanceCount = async () => {
+    let count = 0;
+    try {
+      const response = await apiClient.get(`/attendance/huffaz/${user?.id}`);
+      if (response.data.success) {
+        count = response.data.data?.attendanceCount ?? 0;
+      }
+    } catch (error) {
+      console.error("Error fetching Huffaz attendance count:", error);
+    }
+    setAttendanceCount(count);
+  };
 
   const fetchDashboardStats = async () => {
     try {
@@ -103,6 +118,24 @@ export default function HuffazDashboardScreen({ navigation }: any) {
         ) : (
           <>
             <View style={styles.statsRow}>
+              <Card
+                style={[styles.statCardSmall, { backgroundColor: "#FFF3E0" }]}
+              >
+                <Card.Content style={styles.statContentSmall}>
+                  <IconButton
+                    icon="calendar-check"
+                    iconColor="#FF9800"
+                    size={30}
+                    style={{ margin: 0 }}
+                  />
+                  <Text style={styles.statValueSmall}>
+                    {attendanceCount !== null ? attendanceCount : 0}
+                  </Text>
+                  <Text style={styles.statLabelSmall}>
+                    This Month's Attendance Count
+                  </Text>
+                </Card.Content>
+              </Card>
               <Card
                 style={[styles.statCardSmall, { backgroundColor: "#E8F5E9" }]}
               >

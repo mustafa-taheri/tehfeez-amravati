@@ -137,6 +137,21 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // // If user Role is Huffaz, send current active academic month attandance count along with user profile
+    // let huffazAttendanceCount = 0;
+    // if (authReq.user.role === "HUFFAZ") {
+    //   const academicMonth = await prisma.academicMonth.findFirst({
+    //     where: { isActive: true },
+    //     orderBy: [{ isCurrent: "desc" }, { startDate: "desc" }],
+    //   });
+
+    //   if (academicMonth) {
+    //     huffazAttendanceCount = await prisma.huffazAttendance.count({
+    //       where: { academicMonthId: academicMonth.id },
+    //     });
+    //   }
+    // }
+
     const user = await prisma.user.findUnique({
       where: { id: authReq.user.userId },
       select: {
@@ -165,7 +180,10 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     res.status(200).json({
       success: true,
       message: "User profile retrieved successfully.",
-      data: user,
+      data: {
+        ...user,
+        // huffazAttendanceCount,
+      },
     });
   } catch (error: any) {
     console.error("getMe error:", error);
