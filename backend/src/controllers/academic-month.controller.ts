@@ -126,3 +126,47 @@ export const createAcademicMonth = async (
     });
   }
 };
+
+export const getAcademicMonthsOfActivePeriod = async (
+  _req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const activePeriod = await prisma.academicPeriod.findFirst({
+      where: { isActive: true },
+    });
+
+    if (!activePeriod) {
+      res.status(404).json({
+        success: false,
+        message: "No active academic period found.",
+        code: "RESOURCE_NOT_FOUND",
+      });
+      return;
+    }
+
+    const academicMonths = await prisma.academicMonth.findMany({
+      where: {
+        academicPeriodId: activePeriod.id,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: [{ monthNumber: "asc" }],
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Academic months of the active period retrieved successfully.",
+      data: academicMonths,
+    });
+  } catch (error: any) {
+    console.error("getAcademicMonthsOfActivePeriod error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};

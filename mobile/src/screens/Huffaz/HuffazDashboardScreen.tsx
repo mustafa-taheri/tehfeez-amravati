@@ -19,6 +19,7 @@ export default function HuffazDashboardScreen({ navigation }: any) {
     myStudents: 0,
     quranSessionsToday: 0,
   });
+  const [currentAcademicMonth, setCurrentAcademicMonth] = useState<any>(null);
   const [attendanceCount, setAttendanceCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -42,14 +43,20 @@ export default function HuffazDashboardScreen({ navigation }: any) {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-      const [studentsResponse, sessionsResponse] = await Promise.all([
-        apiClient.get("/students"),
-        apiClient
-          .get("/quran-sessions", {
-            params: { sessionDate: new Date().toISOString() },
-          })
-          .catch(() => null),
-      ]);
+      const [studentsResponse, academicMonthResponse, sessionsResponse] =
+        await Promise.all([
+          apiClient.get("/students"),
+          apiClient.get("academic-months/current").catch(() => null),
+          apiClient
+            .get("/quran-sessions", {
+              params: { sessionDate: new Date().toISOString() },
+            })
+            .catch(() => null),
+        ]);
+
+      if (academicMonthResponse?.data?.success) {
+        setCurrentAcademicMonth(academicMonthResponse.data.data);
+      }
 
       if (studentsResponse.data.success) {
         const totalStudents =
@@ -194,6 +201,16 @@ export default function HuffazDashboardScreen({ navigation }: any) {
                 icon="cash-multiple"
                 color="#4CAF50"
                 onPress={() => navigation.navigate("MyMonthlySettlement")}
+              />
+              <ActionButton
+                title="My Attendance List"
+                icon="calendar-multiple-check"
+                color="#FF5722"
+                onPress={() =>
+                  navigation.navigate("HuffazAttendanceList", {
+                    academicMonth: currentAcademicMonth,
+                  })
+                } // Pass null to show current month by default
               />
               <ActionButton
                 title="My Profile"

@@ -1,6 +1,12 @@
 import type { Request, Response } from "express";
 import { prisma } from "../utils/db.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat.js";
+import utc from "dayjs/plugin/utc.js";
+
+dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 export const recordQuranSession = async (
   req: AuthRequest,
@@ -28,13 +34,11 @@ export const recordQuranSession = async (
     } = req.body;
 
     if (!studentId || !academicMonthId || !sessionDate || !sessionType) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            "Validation failed: studentId, academicMonthId, sessionDate, sessionType are required.",
-        });
+      res.status(400).json({
+        success: false,
+        message:
+          "Validation failed: studentId, academicMonthId, sessionDate, sessionType are required.",
+      });
       return;
     }
 
@@ -43,7 +47,7 @@ export const recordQuranSession = async (
         studentId,
         academicMonthId,
         huffazId: req.user!.userId, // Recorded by the current huffaz
-        sessionDate: new Date(sessionDate),
+        sessionDate: dayjs(sessionDate, "DD-MM-YYYY", true).toDate(),
         sessionType,
         siparaNumber,
         surahName,
@@ -62,22 +66,18 @@ export const recordQuranSession = async (
       },
     });
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Quran session recorded successfully.",
-        data: session,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Quran session recorded successfully.",
+      data: session,
+    });
   } catch (error: any) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
   }
 };
 
@@ -95,7 +95,12 @@ export const getQuranSessions = async (
     if (studentId) where.studentId = studentId as string;
     if (userId) where.huffazId = userId as string;
     if (academicMonthId) where.academicMonthId = academicMonthId as string;
-    if (sessionDate) where.sessionDate = new Date(sessionDate as string);
+    if (sessionDate)
+      where.sessionDate = dayjs(
+        sessionDate as string,
+        "DD-MM-YYYY",
+        true,
+      ).toDate();
 
     const totalRecords = await prisma.quranSession.count({ where });
     const sessions = await prisma.quranSession.findMany({
@@ -125,12 +130,10 @@ export const getQuranSessions = async (
     });
   } catch (error: any) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
   }
 };

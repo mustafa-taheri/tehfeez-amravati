@@ -153,10 +153,10 @@ export default function AdminDashboardScreen({ navigation }: any) {
                 onPress={() => navigation.navigate("StudentList")}
               />
               <ActionButton
-                title="Mark Attendance"
+                title="Mark Huffaz Attendance"
                 icon="calendar-check"
                 color="#009688"
-                onPress={() => navigation.navigate("MarkAttendance")}
+                onPress={() => navigation.navigate("MarkHuffazAttendance")}
               />
               <ActionButton
                 title="Manage Huffaz"

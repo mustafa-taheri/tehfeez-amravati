@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import type { PaymentStatus } from "@prisma/client";
 import { prisma } from "../utils/db.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
+import dayjs from "dayjs";
 
 const calculatePaymentStatus = (
   configuredFee: number,
@@ -1256,7 +1257,7 @@ export const lockMonthlySettlement = async (
       where: { id },
       data: {
         settlementStatus: "LOCKED",
-        lockedAt: new Date(),
+        lockedAt: dayjs().toDate(),
         lockedBy: req.user!.userId,
         updatedBy: req.user!.userId,
       },

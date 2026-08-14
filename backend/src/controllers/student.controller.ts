@@ -1,6 +1,12 @@
 import type { Request, Response } from "express";
 import { prisma } from "../utils/db.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat.js";
+import utc from "dayjs/plugin/utc.js";
+
+dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 export const getStudents = async (
   req: AuthRequest,
@@ -153,10 +159,12 @@ export const createStudent = async (
         mobileNumber: data.mobileNumber,
         parentMobileNumber: data.parentMobileNumber,
         address: data.address,
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+        dateOfBirth: data.dateOfBirth
+          ? dayjs(data.dateOfBirth, "DD-MM-YYYY", true).toDate()
+          : null,
         admissionDate: data.admissionDate
-          ? new Date(data.admissionDate)
-          : new Date(),
+          ? dayjs(data.admissionDate, "DD-MM-YYYY", true).toDate()
+          : dayjs().toDate(),
         gender: data.gender || "MALE",
         currentMarhala: {
           connect: { id: data.currentMarhalaId },
@@ -213,9 +221,11 @@ export const updateStudent = async (
       where: { id: studentId },
       data: {
         ...data,
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
+        dateOfBirth: data.dateOfBirth
+          ? dayjs.utc(data.dateOfBirth, "DD-MM-YYYY", true).toDate()
+          : undefined,
         admissionDate: data.admissionDate
-          ? new Date(data.admissionDate)
+          ? dayjs.utc(data.admissionDate, "DD-MM-YYYY", true).toDate()
           : undefined,
         updatedBy: req.user?.userId,
       },
@@ -265,7 +275,7 @@ export const deleteStudent = async (
       where: { id: studentId },
       data: {
         isActive: false,
-        deletedAt: new Date(),
+        deletedAt: dayjs().toDate(),
         deletedBy: req.user?.userId ?? null,
       },
     });

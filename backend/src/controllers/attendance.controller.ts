@@ -1,7 +1,12 @@
 import type { Request, Response } from "express";
 import { prisma } from "../utils/db.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat.js";
+import utc from "dayjs/plugin/utc.js";
 
+dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 // ------------------------------------------------------------------
 // Student Attendance
 // ------------------------------------------------------------------
@@ -36,7 +41,9 @@ export const markStudentAttendance = async (
       where: {
         studentId_attendanceDate: {
           studentId,
-          attendanceDate: new Date(attendanceDate),
+          attendanceDate: dayjs
+            .utc(attendanceDate, "DD-MM-YYYY", true)
+            .toDate(),
         },
       },
     });
@@ -54,7 +61,7 @@ export const markStudentAttendance = async (
       data: {
         studentId,
         academicMonthId,
-        attendanceDate: new Date(attendanceDate),
+        attendanceDate: dayjs.utc(attendanceDate, "DD-MM-YYYY", true).toDate(),
         attendanceStatus,
         remarks,
         markedBy: req.user!.userId,
@@ -87,14 +94,32 @@ export const getStudentAttendance = async (
     if (studentId) where.studentId = studentId as string;
     if (academicMonthId) where.academicMonthId = academicMonthId as string;
     if (attendanceDate)
-      where.attendanceDate = new Date(attendanceDate as string);
+      where.attendanceDate = dayjs
+        .utc(attendanceDate as string, "DD-MM-YYYY", true)
+        .toDate();
 
     const records = await prisma.studentAttendance.findMany({
       where,
       orderBy: { attendanceDate: "desc" },
+      select: {
+        id: true,
+        studentId: true,
+        academicMonthId: true,
+        attendanceStatus: true,
+        attendanceDate: true,
+        remarks: true,
+      },
     });
 
-    res.status(200).json({ success: true, data: records });
+    // Map through records to convert the native Date objects into strings
+    const formattedRecords = records.map((record) => ({
+      ...record,
+      attendanceDate: record.attendanceDate
+        ? dayjs.utc(record.attendanceDate).format("DD-MM-YYYY")
+        : null,
+    }));
+
+    res.status(200).json({ success: true, data: formattedRecords });
   } catch (error: any) {
     res.status(500).json({
       success: false,
@@ -130,7 +155,9 @@ export const markHuffazAttendance = async (
       where: {
         userId_attendanceDate: {
           userId,
-          attendanceDate: new Date(attendanceDate),
+          attendanceDate: dayjs
+            .utc(attendanceDate, "DD-MM-YYYY", true)
+            .toDate(),
         },
       },
     });
@@ -148,7 +175,7 @@ export const markHuffazAttendance = async (
       data: {
         userId,
         academicMonthId,
-        attendanceDate: new Date(attendanceDate),
+        attendanceDate: dayjs.utc(attendanceDate, "DD-MM-YYYY", true).toDate(),
         attendanceStatus,
         payablePercentage:
           payablePercentage ||
@@ -188,14 +215,33 @@ export const getHuffazAttendance = async (
     if (userId) where.userId = userId as string;
     if (academicMonthId) where.academicMonthId = academicMonthId as string;
     if (attendanceDate)
-      where.attendanceDate = new Date(attendanceDate as string);
+      where.attendanceDate = dayjs
+        .utc(attendanceDate as string, "DD-MM-YYYY", true)
+        .toDate();
 
     const records = await prisma.huffazAttendance.findMany({
       where,
       orderBy: { attendanceDate: "desc" },
+      select: {
+        id: true,
+        userId: true,
+        academicMonthId: true,
+        payablePercentage: true,
+        attendanceStatus: true,
+        attendanceDate: true,
+        remarks: true,
+      },
     });
 
-    res.status(200).json({ success: true, data: records });
+    // Map through records to convert the native Date objects into strings
+    const formattedRecords = records.map((record) => ({
+      ...record,
+      attendanceDate: record.attendanceDate
+        ? dayjs.utc(record.attendanceDate).format("DD-MM-YYYY")
+        : null,
+    }));
+
+    res.status(200).json({ success: true, data: formattedRecords });
   } catch (error: any) {
     res.status(500).json({
       success: false,
@@ -217,8 +263,11 @@ export const getHuffazAttendanceCount = async (
       return;
     }
 
+    const where: any = {};
+    if (userId) where.userId = userId as string;
+
     const count = await prisma.huffazAttendance.count({
-      where: { userId },
+      where,
     });
 
     res.status(200).json({ success: true, data: { count } });

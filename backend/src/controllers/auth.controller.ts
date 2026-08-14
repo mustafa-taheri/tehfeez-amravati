@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../utils/db.js";
 import { generateTokens, verifyToken } from "../utils/jwt.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
+import dayjs from "dayjs";
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -58,7 +59,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Update last login
     await prisma.user.update({
       where: { id: user.id },
-      data: { lastLoginAt: new Date() },
+      data: { lastLoginAt: dayjs().toDate() },
     });
 
     res.status(200).json({

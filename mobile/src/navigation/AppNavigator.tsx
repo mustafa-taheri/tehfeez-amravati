@@ -21,6 +21,8 @@ import MyMonthlySettlementScreen from "../screens/Huffaz/MyMonthlySettlementScre
 import ProfileScreen from "../screens/Auth/ProfileScreen";
 import ChangePasswordScreen from "../screens/Auth/ChangePasswordScreen";
 import AcademicMonthFormScreen from "../screens/Huffaz/AcademicMonthFormScreen";
+import HuffazAttendanceScreen from "../screens/Huffaz/HuffazAttendanceScreen";
+import MarkAttendanceScreenHuffaz from "../screens/Attendance/MarkAttendanceScreenHuffaz";
 
 const Stack = createNativeStackNavigator();
 
@@ -61,6 +63,10 @@ export default function AppNavigator() {
               name="MarkAttendance"
               component={MarkAttendanceScreen}
             />
+            <Stack.Screen
+              name="MarkHuffazAttendance"
+              component={MarkAttendanceScreenHuffaz}
+            />
             <Stack.Screen name="StudentList" component={StudentListScreen} />
             <Stack.Screen
               name="StudentDetail"
@@ -93,6 +99,10 @@ export default function AppNavigator() {
             <Stack.Screen
               name="AcademicMonthForm"
               component={AcademicMonthFormScreen}
+            />
+            <Stack.Screen
+              name="HuffazAttendanceList"
+              component={HuffazAttendanceScreen}
             />
           </Stack.Group>
         )}

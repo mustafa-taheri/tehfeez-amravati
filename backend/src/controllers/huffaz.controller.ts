@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { prisma } from "../utils/db.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
+import dayjs from "dayjs";
 
 export const getHuffazList = async (
   req: AuthRequest,
@@ -326,7 +327,7 @@ export const deleteHuffaz = async (
       where: { id },
       data: {
         isActive: false,
-        deletedAt: new Date(),
+        deletedAt: dayjs().toDate(),
         deletedBy: req.user?.userId ?? null,
         updatedBy: req.user?.userId ?? null,
       },
