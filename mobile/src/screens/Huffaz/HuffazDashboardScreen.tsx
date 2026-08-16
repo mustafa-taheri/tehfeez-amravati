@@ -32,7 +32,7 @@ export default function HuffazDashboardScreen({ navigation }: any) {
     try {
       const response = await apiClient.get(`/attendance/huffaz/${user?.id}`);
       if (response.data.success) {
-        count = response.data.data?.attendanceCount ?? 0;
+        count = response.data.data?.count ?? 0;
       }
     } catch (error) {
       console.error("Error fetching Huffaz attendance count:", error);
@@ -49,8 +49,13 @@ export default function HuffazDashboardScreen({ navigation }: any) {
           apiClient.get("academic-months/current").catch(() => null),
           apiClient
             .get("/quran-sessions", {
-              params: { sessionDate: new Date().toISOString() },
+              params: {
+                sessionDate: new Date()
+                  .toLocaleDateString("en-GB")
+                  .replace(/\//g, "-"),
+              },
             })
+
             .catch(() => null),
         ]);
 
@@ -157,7 +162,8 @@ export default function HuffazDashboardScreen({ navigation }: any) {
                   <Text style={styles.statLabelSmall}>My Students</Text>
                 </Card.Content>
               </Card>
-
+            </View>
+            <View style={styles.statsRow}>
               <Card
                 style={[styles.statCardSmall, { backgroundColor: "#E3F2FD" }]}
               >
@@ -285,6 +291,7 @@ const styles = StyleSheet.create({
     paddingBottom: 50,
   },
   statsRow: {
+    display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 20,

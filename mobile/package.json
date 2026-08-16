@@ -25,6 +25,8 @@
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
+    "tunnel": "npx expo start --tunnel",
+    "clear": "npx expo start --clear",
     "ios": "expo start --ios",
     "web": "expo start --web"
   },

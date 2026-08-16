@@ -23,6 +23,7 @@ import ChangePasswordScreen from "../screens/Auth/ChangePasswordScreen";
 import AcademicMonthFormScreen from "../screens/Huffaz/AcademicMonthFormScreen";
 import HuffazAttendanceScreen from "../screens/Huffaz/HuffazAttendanceScreen";
 import MarkAttendanceScreenHuffaz from "../screens/Attendance/MarkAttendanceScreenHuffaz";
+import MarkAttendanceScreenStudent from "../screens/Attendance/MarkAttendanceScreenStudent";
 
 const Stack = createNativeStackNavigator();
 
@@ -61,7 +62,7 @@ export default function AppNavigator() {
             {/* Common Routes for Admin and Huffaz */}
             <Stack.Screen
               name="MarkAttendance"
-              component={MarkAttendanceScreen}
+              component={MarkAttendanceScreenStudent}
             />
             <Stack.Screen
               name="MarkHuffazAttendance"

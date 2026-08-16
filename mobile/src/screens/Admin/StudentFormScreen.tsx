@@ -178,7 +178,7 @@ export default function StudentFormScreen({ navigation, route }: any) {
           onChangeText={setDateOfBirth}
           style={styles.field}
           mode="outlined"
-          placeholder="YYYY-MM-DD"
+          placeholder="DD-MM-YYYY"
         />
         <TextInput
           label="Admission Date"
@@ -186,7 +186,7 @@ export default function StudentFormScreen({ navigation, route }: any) {
           onChangeText={setAdmissionDate}
           style={styles.field}
           mode="outlined"
-          placeholder="YYYY-MM-DD"
+          placeholder="DD-MM-YYYY"
         />
 
         <Card style={styles.card}>

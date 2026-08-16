@@ -65,6 +65,7 @@ export const authenticate = async (
 
 export const authorize = (roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
+    console.log("User role:", req.user?.role);
     if (!req.user || !roles.includes(req.user.role)) {
       res.status(403).json({
         success: false,

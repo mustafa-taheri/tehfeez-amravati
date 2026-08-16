@@ -78,7 +78,7 @@ export default function MarkAttendanceScreen({ navigation }: any) {
       }
 
       const academicMonthId = currentAcademicMonth.id;
-      const today = new Date().toISOString();
+      const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
 
       const promises = students.map((student) =>
         apiClient

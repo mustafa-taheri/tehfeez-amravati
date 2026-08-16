@@ -14,6 +14,8 @@ export const markStudentAttendance = async (
   req: AuthRequest,
   res: Response,
 ): Promise<void> => {
+  console.log(req.body);
+
   try {
     const {
       studentId,
@@ -72,6 +74,60 @@ export const markStudentAttendance = async (
       success: true,
       message: "Student attendance marked successfully",
       data: attendance,
+    });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+// Create API to mark student attendance in bulk for a specific academic month and date
+export const markStudentAttendanceBulk = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { academicMonthId, attendanceDate, attendanceRecords } = req.body;
+
+    if (!academicMonthId || !attendanceDate || !attendanceRecords?.length) {
+      res.status(400).json({
+        success: false,
+        message: "Validation failed.",
+        errors: [{ field: "required", message: "Missing required fields" }],
+      });
+      return;
+    }
+
+    const formattedDate = dayjs
+      .utc(attendanceDate, "DD-MM-YYYY", true)
+      .toDate();
+
+    const createPromises = attendanceRecords.map((record: any) =>
+      prisma.studentAttendance
+        .create({
+          data: {
+            studentId: record.studentId,
+            academicMonthId,
+            attendanceDate: formattedDate,
+            attendanceStatus: record.attendanceStatus,
+            remarks: record.remarks,
+            markedBy: req.user!.userId,
+          },
+        })
+        .catch((e: any) =>
+          console.log("Error marking for", record.studentId, e.response?.data),
+        ),
+    );
+
+    await Promise.all(createPromises);
+
+    res.status(201).json({
+      success: true,
+      message: "Student attendance marked successfully",
     });
   } catch (error: any) {
     console.error(error);
@@ -256,7 +312,7 @@ export const getHuffazAttendanceCount = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const { userId } = req.params;
+    const userId = req.params.id;
 
     if (!userId) {
       res.status(400).json({ success: false, message: "User ID is required." });

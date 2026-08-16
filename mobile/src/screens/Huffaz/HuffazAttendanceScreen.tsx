@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import apiClient from "../../api/client";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ActivityIndicator, Appbar, Card, Text } from "react-native-paper";
+import {
+  ActivityIndicator,
+  Appbar,
+  Card,
+  Portal,
+  Text,
+} from "react-native-paper";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Dropdown } from "react-native-paper-dropdown";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -32,7 +38,12 @@ const HuffazAttendanceScreen = ({ navigation, route }: any) => {
     try {
       const response = await apiClient.get("/academic-months/periods/months");
       if (response.data.success) {
-        setAcademicMonthsOptions(response.data.data || null);
+        // converting the response data to the format required by the dropdown (i.e. label and value)
+        const formattedOptions = response.data.data.map((month: any) => ({
+          label: month.name,
+          value: month.id,
+        }));
+        setAcademicMonthsOptions(formattedOptions || []);
       } else {
         setError(
           response.data.message || "Unable to load current academic month.",
@@ -63,65 +74,59 @@ const HuffazAttendanceScreen = ({ navigation, route }: any) => {
     }
   };
   const renderAttendanceItem = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      onPress={() =>
-        navigation.navigate("StudentDetail", {
-          studentId: item.id,
-          student: item,
-        })
-      }
-    >
-      <Card style={styles.attendanceCard}>
-        <Card.Content style={styles.cardContent}>
-          <View style={styles.attendanceInfo}>
-            <Text style={styles.attendanceStatus}>{item.attendanceStatus}</Text>
-            <Text style={styles.attendanceDate}>
-              Date: {item.attendanceDate}
-            </Text>
-            <Text style={styles.attendanceDate}>Remark: {item.remark}</Text>
-          </View>
-        </Card.Content>
-      </Card>
-    </TouchableOpacity>
+    <Card style={styles.attendanceCard}>
+      <Card.Content style={styles.cardContent}>
+        <View style={styles.attendanceInfo}>
+          <Text style={styles.attendanceStatus}>{item.attendanceStatus}</Text>
+          <Text style={styles.attendanceDate}>Date: {item.attendanceDate}</Text>
+          <Text style={styles.attendanceDate}>Remark: {item.remarks}</Text>
+        </View>
+      </Card.Content>
+    </Card>
   );
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Appbar.Header style={styles.appBar}>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Huffaz Attendance Screen" />
-      </Appbar.Header>
+    <PaperProvider>
+      <Portal.Host>
+        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+          <Appbar.Header style={styles.appBar}>
+            <Appbar.BackAction onPress={() => navigation.goBack()} />
+            <Appbar.Content title="Huffaz Attendance Screen" />
+          </Appbar.Header>
 
-      <View style={styles.container}>
-        <PaperProvider>
-          <Dropdown
-            label="Select Academic Month"
-            options={academicMonthsOptions}
-            value={selectedAcademicMonth}
-            onSelect={(value) => setSelectedAcademicMonth(value)}
-            menuContentStyle={styles.field}
-            mode="outlined"
-          />
-        </PaperProvider>
-
-        {loading ? (
-          <ActivityIndicator size="large" style={styles.loader} />
-        ) : (
-          <FlatList
-            data={attendanceList}
-            keyExtractor={(item) => item.id}
-            renderItem={renderAttendanceItem}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>
-                No Attendance for selected month.
-              </Text>
-            }
-          />
-        )}
-      </View>
-    </SafeAreaView>
+          <View style={styles.container}>
+            <View style={{ marginBottom: 20 }}>
+              <Dropdown
+                label="Select Academic Month"
+                options={academicMonthsOptions}
+                value={selectedAcademicMonth}
+                onSelect={(value) => setSelectedAcademicMonth(value)}
+                menuContentStyle={styles.field}
+                mode="outlined"
+              />
+            </View>
+            {/* </View>
+      <View style={styles.container}> */}
+            {loading ? (
+              <ActivityIndicator size="large" style={styles.loader} />
+            ) : (
+              <FlatList
+                data={attendanceList}
+                keyExtractor={(item) => item.id}
+                renderItem={renderAttendanceItem}
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={false}
+                ListEmptyComponent={
+                  <Text style={styles.emptyText}>
+                    No Attendance for selected month.
+                  </Text>
+                }
+              />
+            )}
+          </View>
+        </SafeAreaView>
+      </Portal.Host>
+    </PaperProvider>
   );
 };
 
@@ -141,11 +146,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 15,
+    flexDirection: "column",
   },
   field: {
     marginBottom: 20,
     backgroundColor: "#fff",
     borderRadius: 10,
+    elevation: 2,
   },
   loader: {
     flex: 1,

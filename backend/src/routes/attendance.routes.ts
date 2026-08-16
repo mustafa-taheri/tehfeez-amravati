@@ -20,10 +20,10 @@ router.get("/student", authorize(["ADMIN", "HUFFAZ"]), getStudentAttendance);
 // Huffaz Attendance
 // Only Admin can mark Huffaz attendance
 router.post("/huffaz", authorize(["ADMIN"]), markHuffazAttendance);
-router.get("/huffaz", authorize(["ADMIN"]), getHuffazAttendance);
+router.get("/huffaz", authorize(["ADMIN", "HUFFAZ"]), getHuffazAttendance);
 router.get(
   "/huffaz/:id",
-  authorize(["ADMIN,HUFFAZ"]),
+  authorize(["ADMIN", "HUFFAZ"]),
   getHuffazAttendanceCount,
 );
 

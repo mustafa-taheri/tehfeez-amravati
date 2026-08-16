@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { View, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  RefreshControl,
+} from "react-native";
 import {
   Title,
   Card,
@@ -9,6 +15,8 @@ import {
   Appbar,
   ActivityIndicator,
   Button,
+  IconButton,
+  useTheme,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
@@ -18,6 +26,8 @@ export default function StudentListScreen({ navigation }: any) {
   const [searchQuery, setSearchQuery] = useState("");
   const [students, setStudents] = useState<any[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const { colors } = useTheme();
 
   useEffect(() => {
     fetchStudents();
@@ -81,19 +91,31 @@ export default function StudentListScreen({ navigation }: any) {
     </TouchableOpacity>
   );
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchStudents();
+    setRefreshing(false);
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Appbar.Header style={styles.appBar}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Students" />
-        <Button
+        {/* <Button
           mode="contained"
           onPress={() => navigation.navigate("StudentForm", { student: null })}
           compact
           style={styles.addButton}
-        >
-          Add
-        </Button>
+        > */}
+        <IconButton
+          icon="plus"
+          mode="contained"
+          onPress={() => navigation.navigate("StudentForm", { student: null })}
+          size={20}
+          // iconColor="#fff"
+        />
+        {/* </Button> */}
       </Appbar.Header>
 
       <View style={styles.container}>
@@ -116,6 +138,15 @@ export default function StudentListScreen({ navigation }: any) {
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <Text style={styles.emptyText}>No students found.</Text>
+            }
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => onRefresh()}
+                colors={[colors.primary]} // Android spinner color
+                progressBackgroundColor={colors.elevation.level2} // Android card background
+                tintColor={colors.primary} // iOS spinner color
+              />
             }
           />
         )}

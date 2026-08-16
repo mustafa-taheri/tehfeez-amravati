@@ -93,10 +93,8 @@ export default function AttendanceReportScreen({ navigation, route }: any) {
             <View style={styles.summaryRow}>
               <Card style={styles.summaryCard}>
                 <Card.Content>
-                  <Text>HALF_DAY</Text>
-                  <Text style={styles.summaryValue}>
-                    {summary.HALF_DAY || 0}
-                  </Text>
+                  <Text>UZUR</Text>
+                  <Text style={styles.summaryValue}>{summary.UZUR || 0}</Text>
                 </Card.Content>
               </Card>
               <Card style={styles.summaryCard}>
@@ -116,7 +114,7 @@ export default function AttendanceReportScreen({ navigation, route }: any) {
                   <Card.Content>
                     <View style={styles.recordHeader}>
                       <Text style={styles.recordDate}>
-                        {new Date(item.attendanceDate).toDateString()}
+                        {item.attendanceDate}
                       </Text>
                       <Text>{item.attendanceStatus}</Text>
                     </View>
