@@ -104,6 +104,16 @@ export const refreshToken = async (
     const decoded = verifyToken(refreshToken);
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
+      select: {
+        id: true,
+        role: true,
+        isActive: true,
+        firstName: true,
+        lastName: true,
+        fullName: true,
+        username: true,
+        profileImage: true,
+      },
     });
     if (!user || !user.isActive) {
       res
@@ -116,7 +126,10 @@ export const refreshToken = async (
     res.status(200).json({
       success: true,
       message: "Token refreshed successfully.",
-      data: tokens,
+      data: {
+        tokens,
+        user,
+      },
     });
   } catch (error: any) {
     console.error("refreshToken error:", error);

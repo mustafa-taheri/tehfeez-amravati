@@ -14,10 +14,12 @@ type UserProfile = {
 type AuthContextType = {
   isLoading: boolean;
   userToken: string | null;
+  refreshToken: string | null;
   userRole: string | null;
   user: UserProfile | null;
   signIn: (
     token: string,
+    refreshToken: string,
     role: string,
     userData?: UserProfile,
   ) => Promise<void>;
@@ -28,26 +30,46 @@ type AuthContextType = {
 export const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   userToken: null,
+  refreshToken: null,
   userRole: null,
   user: null,
-  signIn: async () => {},
-  updateUser: async () => {},
+  signIn: async (
+    token: string,
+    refreshToken: string,
+    role: string,
+    userData?: UserProfile,
+  ) => {},
+  updateUser: async (userData: UserProfile) => {},
   signOut: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [userToken, setUserToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null); // State for refresh token
   const [userRole, setUserRole] = useState<string | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
 
+  const checkStorage = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const result = await AsyncStorage.multiGet(keys);
+      console.log("Current AsyncStorage Dump:", Object.fromEntries(result));
+    } catch (error) {
+      console.error("Error reading AsyncStorage:", error);
+    }
+  };
+  checkStorage();
   useEffect(() => {
     const bootstrapAsync = async () => {
       try {
         const token = await AsyncStorage.getItem("accessToken");
         const role = await AsyncStorage.getItem("userRole");
+        const storedRefreshToken = await AsyncStorage.getItem("refreshToken"); // Read refresh token
         const storedUser = await AsyncStorage.getItem("user");
+
         setUserToken(token);
+        setRefreshToken(storedRefreshToken); // Set refresh token
         setUserRole(role);
         setUser(storedUser ? JSON.parse(storedUser) : null);
       } catch (e) {
@@ -61,15 +83,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (
     token: string,
+    refreshTokenInput: string,
     role: string,
     userData?: UserProfile,
   ) => {
     await AsyncStorage.setItem("accessToken", token);
+    await AsyncStorage.setItem("refreshToken", refreshTokenInput); // Store refresh token
     await AsyncStorage.setItem("userRole", role);
     if (userData) {
       await AsyncStorage.setItem("user", JSON.stringify(userData));
     }
     setUserToken(token);
+    setRefreshToken(refreshTokenInput);
     setUserRole(role);
     setUser(userData ?? null);
   };
@@ -85,6 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await AsyncStorage.removeItem("userRole");
     await AsyncStorage.removeItem("user");
     setUserToken(null);
+    setRefreshToken(null);
     setUserRole(null);
     setUser(null);
   };
@@ -94,6 +120,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       value={{
         isLoading,
         userToken,
+        refreshToken,
         userRole,
         user,
         signIn,
