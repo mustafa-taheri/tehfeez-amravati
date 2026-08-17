@@ -107,13 +107,9 @@ export default function ProfileScreen({ navigation }: any) {
         ) : (
           <>
             <View style={styles.avatarRow}>
-              <Avatar.Image
+              <Avatar.Text
                 size={96}
-                source={
-                  profileImage
-                    ? { uri: profileImage }
-                    : require("../../../assets/pngegg.png")
-                }
+                label={`${user?.firstName?.charAt(0)}${user?.lastName?.charAt(0)}`}
                 style={styles.avatar}
               />
               <View style={styles.avatarTextContainer}>
@@ -150,13 +146,6 @@ export default function ProfileScreen({ navigation }: any) {
               onChangeText={setMobileNumber}
               mode="outlined"
               keyboardType="phone-pad"
-              style={styles.field}
-            />
-            <TextInput
-              label="Profile Image URL"
-              value={profileImage}
-              onChangeText={setProfileImage}
-              mode="outlined"
               style={styles.field}
             />
             <Button

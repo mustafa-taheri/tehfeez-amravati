@@ -1,5 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+} from "react-native";
 import {
   Text,
   Card,
@@ -8,6 +14,7 @@ import {
   Avatar,
   IconButton,
   ActivityIndicator,
+  useTheme,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "../../context/AuthContext";
@@ -21,15 +28,17 @@ export default function AdminDashboardScreen({ navigation }: any) {
     presentToday: 0,
     absentToday: 0,
   });
+  const [refreshing, setRefreshing] = useState(false);
+  const { colors } = useTheme();
 
   useEffect(() => {
     // Fetch stats on mount
     fetchDashboardStats();
   }, []);
 
-  const fetchDashboardStats = async () => {
+  const fetchDashboardStats = async (isRefreshing = false) => {
     try {
-      setLoading(true);
+      if (!isRefreshing) setLoading(true);
       const [studentsResponse, attendanceResponse] = await Promise.all([
         apiClient.get("/students"),
         apiClient
@@ -64,9 +73,15 @@ export default function AdminDashboardScreen({ navigation }: any) {
         error?.response?.data?.message,
       );
     } finally {
-      setLoading(false);
+      if (!isRefreshing) setLoading(false);
     }
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchDashboardStats(true);
+    setRefreshing(false);
+  }, []);
 
   const handleLogout = async () => {
     await signOut();
@@ -120,6 +135,15 @@ export default function AdminDashboardScreen({ navigation }: any) {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => onRefresh()}
+            colors={[colors.primary]} // Android spinner color
+            progressBackgroundColor={colors.elevation.level2} // Android card background
+            tintColor={colors.primary} // iOS spinner color
+          />
+        }
       >
         {loading ? (
           <ActivityIndicator size="large" style={{ marginTop: 50 }} />

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { View, StyleSheet, ScrollView, RefreshControl } from "react-native";
 import {
   Appbar,
   ActivityIndicator,
@@ -8,6 +8,7 @@ import {
   Divider,
   Text,
   Title,
+  useTheme,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
@@ -16,10 +17,12 @@ export default function MyMonthlySettlementScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [settlement, setSettlement] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const { colors } = useTheme();
 
-  const fetchMySettlement = async () => {
+  const fetchMySettlement = async (isRefreshing = false) => {
     try {
-      setLoading(true);
+      if (!isRefreshing) setLoading(true);
       setError(null);
 
       const monthResponse = await apiClient.get("/academic-months/current");
@@ -53,7 +56,7 @@ export default function MyMonthlySettlementScreen({ navigation }: any) {
       );
       setError("Failed to load your monthly settlement. Please try again.");
     } finally {
-      setLoading(false);
+      if (!isRefreshing) setLoading(false);
     }
   };
 
@@ -95,6 +98,12 @@ export default function MyMonthlySettlementScreen({ navigation }: any) {
   const statusMeta =
     statusMap[settlementStatus as keyof typeof statusMap] || statusMap.DRAFT;
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchMySettlement(true);
+    setRefreshing(false);
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Appbar.Header style={styles.appBar}>
@@ -102,7 +111,18 @@ export default function MyMonthlySettlementScreen({ navigation }: any) {
         <Appbar.Content title="My Monthly Settlement" />
       </Appbar.Header>
 
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => onRefresh()}
+            colors={[colors.primary]} // Android spinner color
+            progressBackgroundColor={colors.elevation.level2} // Android card background
+            tintColor={colors.primary} // iOS spinner color
+          />
+        }
+      >
         {loading ? (
           <ActivityIndicator size="large" style={{ marginTop: 50 }} />
         ) : error ? (
@@ -110,7 +130,7 @@ export default function MyMonthlySettlementScreen({ navigation }: any) {
             <Text style={styles.errorText}>{error}</Text>
             <Button
               mode="contained"
-              onPress={fetchMySettlement}
+              onPress={() => fetchMySettlement()}
               style={styles.retryButton}
             >
               Retry

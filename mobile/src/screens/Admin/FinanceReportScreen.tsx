@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { View, StyleSheet, ScrollView, RefreshControl } from "react-native";
 import {
   Title,
   Text,
@@ -8,6 +8,7 @@ import {
   Appbar,
   ActivityIndicator,
   Divider,
+  useTheme,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
@@ -16,14 +17,16 @@ export default function FinanceReportScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [report, setReport] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const { colors } = useTheme();
 
   useEffect(() => {
     fetchReport();
   }, []);
 
-  const fetchReport = async () => {
+  const fetchReport = async (isRefreshing = false) => {
     try {
-      setLoading(true);
+      if (!isRefreshing) setLoading(true);
       setError(null);
       const monthResponse = await apiClient.get("/academic-months/current");
       if (!monthResponse.data?.success) {
@@ -53,9 +56,15 @@ export default function FinanceReportScreen({ navigation }: any) {
       console.error("fetchReport error:", fetchError?.response?.data?.message);
       setError("Failed to load finance report. Please try again.");
     } finally {
-      setLoading(false);
+      if (!isRefreshing) setLoading(false);
     }
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchReport(true);
+    setRefreshing(false);
+  }, []);
 
   const renderSummaryCard = (title: string, value: string | number) => (
     <Card style={styles.summaryCard}>
@@ -73,7 +82,18 @@ export default function FinanceReportScreen({ navigation }: any) {
         <Appbar.Content title="Finance Report" />
       </Appbar.Header>
 
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => onRefresh()}
+            colors={[colors.primary]} // Android spinner color
+            progressBackgroundColor={colors.elevation.level2} // Android card background
+            tintColor={colors.primary} // iOS spinner color
+          />
+        }
+      >
         {loading ? (
           <ActivityIndicator size="large" style={{ marginTop: 50 }} />
         ) : error ? (
@@ -81,7 +101,7 @@ export default function FinanceReportScreen({ navigation }: any) {
             <Text style={styles.errorText}>{error}</Text>
             <Button
               mode="contained"
-              onPress={fetchReport}
+              onPress={() => fetchReport()}
               style={styles.retryButton}
             >
               Retry

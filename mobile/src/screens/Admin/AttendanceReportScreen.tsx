@@ -1,5 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { View, StyleSheet, FlatList } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
 import {
   Title,
   Text,
@@ -7,6 +13,7 @@ import {
   ActivityIndicator,
   Card,
   Button,
+  useTheme,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
@@ -18,13 +25,16 @@ export default function AttendanceReportScreen({ navigation, route }: any) {
   const [summary, setSummary] = useState<any>({});
   const [monthName, setMonthName] = useState<string>("");
 
+  const [refreshing, setRefreshing] = useState(false);
+  const { colors } = useTheme();
+
   useEffect(() => {
     fetchAttendance();
   }, []);
 
-  const fetchAttendance = async () => {
+  const fetchAttendance = async (isRefreshing = false) => {
     try {
-      setLoading(true);
+      if (!isRefreshing) setLoading(true);
       const monthResponse = await apiClient.get("/academic-months/current");
       if (!monthResponse.data.success) {
         return;
@@ -54,9 +64,15 @@ export default function AttendanceReportScreen({ navigation, route }: any) {
         error?.response?.data?.message,
       );
     } finally {
-      setLoading(false);
+      if (!isRefreshing) setLoading(false);
     }
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchAttendance(true);
+    setRefreshing(false);
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -64,7 +80,18 @@ export default function AttendanceReportScreen({ navigation, route }: any) {
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Attendance Report" />
       </Appbar.Header>
-      <View style={styles.container}>
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => onRefresh()}
+            colors={[colors.primary]} // Android spinner color
+            progressBackgroundColor={colors.elevation.level2} // Android card background
+            tintColor={colors.primary} // iOS spinner color
+          />
+        }
+      >
         {loading ? (
           <ActivityIndicator size="large" style={{ marginTop: 40 }} />
         ) : (
@@ -135,14 +162,14 @@ export default function AttendanceReportScreen({ navigation, route }: any) {
 
             <Button
               mode="contained"
-              onPress={fetchAttendance}
+              onPress={() => fetchAttendance()}
               style={styles.reloadButton}
             >
               Refresh
             </Button>
           </>
         )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

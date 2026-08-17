@@ -1,5 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+} from "react-native";
 import {
   Text,
   Card,
@@ -7,6 +13,7 @@ import {
   Avatar,
   IconButton,
   ActivityIndicator,
+  useTheme,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "../../context/AuthContext";
@@ -21,6 +28,8 @@ export default function HuffazDashboardScreen({ navigation }: any) {
   });
   const [currentAcademicMonth, setCurrentAcademicMonth] = useState<any>(null);
   const [attendanceCount, setAttendanceCount] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const { colors } = useTheme();
 
   useEffect(() => {
     fetchDashboardStats();
@@ -43,9 +52,10 @@ export default function HuffazDashboardScreen({ navigation }: any) {
     setAttendanceCount(count);
   };
 
-  const fetchDashboardStats = async () => {
+  const fetchDashboardStats = async (isRefreshing = false) => {
     try {
-      setLoading(true);
+      if (!isRefreshing) setLoading(true);
+
       const [studentsResponse, academicMonthResponse, sessionsResponse] =
         await Promise.all([
           apiClient.get("/students"),
@@ -58,7 +68,6 @@ export default function HuffazDashboardScreen({ navigation }: any) {
                   .replace(/\//g, "-"),
               },
             })
-
             .catch(() => null),
         ]);
 
@@ -86,9 +95,15 @@ export default function HuffazDashboardScreen({ navigation }: any) {
         error?.response?.data?.message,
       );
     } finally {
-      setLoading(false);
+      if (!isRefreshing) setLoading(false);
     }
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([fetchDashboardStats(true), getHuffazAttendanceCount()]);
+    setRefreshing(false);
+  }, []);
 
   const handleLogout = async () => {
     await signOut();
@@ -130,6 +145,15 @@ export default function HuffazDashboardScreen({ navigation }: any) {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => onRefresh()}
+            colors={[colors.primary]} // Android spinner color
+            progressBackgroundColor={colors.elevation.level2} // Android card background
+            tintColor={colors.primary} // iOS spinner color
+          />
+        }
       >
         {loading ? (
           <ActivityIndicator size="large" style={{ marginTop: 50 }} />

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, FlatList, TouchableOpacity } from "react-native";
 import {
   Title,
@@ -9,23 +9,27 @@ import {
   Searchbar,
   Button,
   Avatar,
+  useTheme,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
+import { RefreshControl } from "react-native";
 
 export default function HuffazListScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [huffazList, setHuffazList] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const { colors } = useTheme();
 
   useEffect(() => {
     fetchHuffaz();
   }, []);
 
-  const fetchHuffaz = async () => {
+  const fetchHuffaz = async (isRefreshing = false) => {
     try {
-      setLoading(true);
+      if (!isRefreshing) setLoading(true);
       const response = await apiClient.get("/huffaz");
       if (response.data.success) {
         setHuffazList(response.data.data);
@@ -37,7 +41,7 @@ export default function HuffazListScreen({ navigation }: any) {
         error?.response?.data?.message,
       );
     } finally {
-      setLoading(false);
+      if (!isRefreshing) setLoading(false);
     }
   };
 
@@ -59,6 +63,12 @@ export default function HuffazListScreen({ navigation }: any) {
       ),
     );
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchHuffaz();
+    setRefreshing(false);
+  }, []);
 
   const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity
@@ -122,6 +132,15 @@ export default function HuffazListScreen({ navigation }: any) {
               <Text style={styles.emptyText}>No Huffaz found.</Text>
             }
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => onRefresh()}
+                colors={[colors.primary]} // Android spinner color
+                progressBackgroundColor={colors.elevation.level2} // Android card background
+                tintColor={colors.primary} // iOS spinner color
+              />
+            }
           />
         )}
       </View>
