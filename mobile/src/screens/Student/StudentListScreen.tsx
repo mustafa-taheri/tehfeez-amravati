@@ -41,8 +41,8 @@ export default function StudentListScreen({ navigation }: any) {
         setStudents(response.data.data);
         setFilteredStudents(response.data.data);
       }
-    } catch (error) {
-      console.error("Failed to fetch students", error);
+    } catch (error: any) {
+      console.error("Failed to fetch students", error?.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -102,20 +102,12 @@ export default function StudentListScreen({ navigation }: any) {
       <Appbar.Header style={styles.appBar}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Students" />
-        {/* <Button
-          mode="contained"
-          onPress={() => navigation.navigate("StudentForm", { student: null })}
-          compact
-          style={styles.addButton}
-        > */}
         <IconButton
           icon="plus"
           mode="contained"
           onPress={() => navigation.navigate("StudentForm", { student: null })}
           size={20}
-          // iconColor="#fff"
         />
-        {/* </Button> */}
       </Appbar.Header>
 
       <View style={styles.container}>

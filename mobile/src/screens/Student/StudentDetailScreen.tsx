@@ -31,8 +31,8 @@ export default function StudentDetailScreen({ route, navigation }: any) {
       if (response.data.success) {
         setStudent(response.data.data);
       }
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error(error?.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -46,8 +46,11 @@ export default function StudentDetailScreen({ route, navigation }: any) {
       if (response.data.success) {
         setRecentSessions(response.data.data);
       }
-    } catch (error) {
-      console.error("Failed to fetch recent sessions", error);
+    } catch (error: any) {
+      console.error(
+        "Failed to fetch recent sessions",
+        error?.response?.data?.message,
+      );
     }
   };
 
@@ -150,8 +153,11 @@ export default function StudentDetailScreen({ route, navigation }: any) {
                         if (response.data.success) {
                           navigation.goBack();
                         }
-                      } catch (error) {
-                        console.error("Failed to delete student", error);
+                      } catch (error: any) {
+                        console.error(
+                          "Failed to delete student",
+                          error?.response?.data?.message,
+                        );
                         Alert.alert("Error", "Could not delete student.");
                       }
                     },

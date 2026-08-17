@@ -47,7 +47,10 @@ export default function MyMonthlySettlementScreen({ navigation }: any) {
 
       setSettlement(response.data.data);
     } catch (fetchError: any) {
-      console.error("fetchMySettlement error:", fetchError);
+      console.error(
+        "fetchMySettlement error:",
+        fetchError?.response?.data?.message,
+      );
       setError("Failed to load your monthly settlement. Please try again.");
     } finally {
       setLoading(false);

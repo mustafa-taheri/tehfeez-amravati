@@ -34,8 +34,11 @@ export default function HuffazDashboardScreen({ navigation }: any) {
       if (response.data.success) {
         count = response.data.data?.count ?? 0;
       }
-    } catch (error) {
-      console.error("Error fetching Huffaz attendance count:", error);
+    } catch (error: any) {
+      console.error(
+        "Error fetching Huffaz attendance count:",
+        error?.response?.data?.message,
+      );
     }
     setAttendanceCount(count);
   };
@@ -77,8 +80,11 @@ export default function HuffazDashboardScreen({ navigation }: any) {
           quranSessionsToday: sessionsToday,
         });
       }
-    } catch (error) {
-      console.error("Failed to fetch dashboard stats", error);
+    } catch (error: any) {
+      console.error(
+        "Failed to fetch dashboard stats",
+        error?.response?.data?.message,
+      );
     } finally {
       setLoading(false);
     }

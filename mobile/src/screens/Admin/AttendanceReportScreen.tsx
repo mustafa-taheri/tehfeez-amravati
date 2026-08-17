@@ -48,8 +48,11 @@ export default function AttendanceReportScreen({ navigation, route }: any) {
         }, {});
         setSummary(counts);
       }
-    } catch (error) {
-      console.error("Failed to fetch attendance", error);
+    } catch (error: any) {
+      console.error(
+        "Failed to fetch attendance",
+        error?.response?.data?.message,
+      );
     } finally {
       setLoading(false);
     }

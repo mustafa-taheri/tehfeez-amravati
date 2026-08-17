@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, FlatList, Alert } from "react-native";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
 import {
   Title,
   Button,
@@ -16,13 +22,12 @@ import apiClient from "../../api/client";
 export default function MarkAttendanceScreenHuffaz({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [huffazs, setHuffazs] = useState<any[]>([]);
-  const [attendanceData, setAttendanceData] = useState<Record<string, string>>(
-    {},
-  );
   const [currentAcademicMonth, setCurrentAcademicMonth] = useState<any | null>(
     null,
   );
+  const [attendanceStatus, setAttendanceStatus] = useState("PRESENT");
+  const [selectedHuffaz, setSelectedHuffaz] = useState<any | null>(null);
+  const [huffazList, setHuffazList] = useState<any[]>([]);
 
   useEffect(() => {
     fetchHuffazs();
@@ -36,33 +41,26 @@ export default function MarkAttendanceScreenHuffaz({ navigation }: any) {
         apiClient.get("/academic-months/current").catch(() => null),
       ]);
 
-      if (huffazsResponse.data.success) {
+      if (huffazsResponse?.data?.success) {
         const huffazList = huffazsResponse.data.data;
-        setHuffazs(huffazList);
-
-        const initialData: Record<string, string> = {};
-        huffazList.forEach((h: any) => {
-          initialData[h.id] = "PRESENT";
-        });
-        setAttendanceData(initialData);
+        setHuffazList(huffazList);
       }
 
       if (monthResponse?.data?.success) {
         setCurrentAcademicMonth(monthResponse.data.data);
       }
-    } catch (error) {
-      console.error("Failed to fetch huffazs", error);
-      Alert.alert("Error", "Could not load huffaz list. Please try again.");
+    } catch (error: any) {
+      console.error("Failed to fetch huffazs", error?.response?.data?.message);
+      Alert.alert(
+        "Error",
+        `Could not load huffaz list. ${error?.response?.data?.message || ""}`,
+      );
     } finally {
       setLoading(false);
     }
   };
-
-  const handleStatusChange = (userId: string, status: string) => {
-    setAttendanceData((prev) => ({
-      ...prev,
-      [userId]: status,
-    }));
+  const handleStatusChange = (status: string) => {
+    setAttendanceStatus(status);
   };
 
   const submitAttendance = async () => {
@@ -77,107 +75,65 @@ export default function MarkAttendanceScreenHuffaz({ navigation }: any) {
         return;
       }
 
+      if (!selectedHuffaz?.id) {
+        Alert.alert(
+          "Error",
+          "No Huffaz selected. Please go back and select a Huffaz.",
+        );
+        return;
+      }
+
       const academicMonthId = currentAcademicMonth.id;
-      const today = new Date().toISOString();
+      const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
 
-      const promises = huffazs.map((huffaz) =>
-        apiClient
-          .post("/attendance/huffaz", {
-            userId: huffaz.id,
-            academicMonthId,
-            attendanceDate: today,
-            attendanceStatus: attendanceData[huffaz.id],
-          })
-          .catch((e: any) =>
-            console.log("Error marking for", huffaz.id, e.response?.data),
-          ),
+      const response = await apiClient.post("/attendance/huffaz", {
+        userId: selectedHuffaz.id,
+        attendanceStatus: attendanceStatus,
+        attendanceDate: today,
+        academicMonthId: academicMonthId,
+      });
+
+      if (response.data.success) {
+        Alert.alert("Success", "Attendance marked successfully.");
+      } else {
+        Alert.alert("Error", "Failed to mark attendance. Please try again.");
+      }
+    } catch (error: any) {
+      console.error(
+        "Failed to submit attendance",
+        error?.response?.data?.message,
       );
-
-      await Promise.all(promises);
-
-      Alert.alert("Success", "Attendance has been recorded successfully.", [
-        { text: "OK", onPress: () => navigation.goBack() },
-      ]);
-    } catch (error) {
-      Alert.alert("Error", "Failed to submit attendance.");
+      Alert.alert(
+        "Error",
+        `Could not submit attendance. ${error?.response?.data?.message || "An unknown error occurred."}`,
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
   const renderHuffazItem = ({ item }: { item: any }) => (
-    <Card style={styles.huffazCard}>
-      <Card.Content>
-        <View style={styles.huffazHeader}>
-          <Avatar.Text
-            size={40}
-            label={
-              item.firstName.charAt(0) +
-              (item.lastName ? item.lastName.charAt(0) : "")
-            }
-            style={styles.avatar}
-          />
-          <View style={styles.huffazInfo}>
-            <Text style={styles.huffazName}>
-              {item.firstName} {item.lastName}
-            </Text>
+    <TouchableOpacity onPress={() => setSelectedHuffaz(item)}>
+      <Card style={styles.huffazCard}>
+        <Card.Content>
+          <View style={styles.huffazHeader}>
+            <Avatar.Text
+              size={40}
+              label={
+                item.firstName.charAt(0) +
+                (item.lastName ? item.lastName.charAt(0) : "")
+              }
+              style={styles.avatar}
+            />
+            <View style={styles.huffazInfo}>
+              <Text style={styles.huffazName}>
+                {item.firstName} {item.lastName}
+              </Text>
+            </View>
           </View>
-        </View>
-
-        <SegmentedButtons
-          value={attendanceData[item.id]}
-          onValueChange={(value) => handleStatusChange(item.id, value)}
-          buttons={[
-            {
-              value: "PRESENT",
-              label: "P",
-              checkedColor: "white",
-              style:
-                attendanceData[item.id] === "PRESENT"
-                  ? { backgroundColor: "#4CAF50" }
-                  : {},
-            },
-            {
-              value: "HALF_DAY",
-              label: "H",
-              checkedColor: "white",
-              style:
-                attendanceData[item.id] === "HALF_DAY"
-                  ? { backgroundColor: "#FFEB3B" }
-                  : {},
-            },
-            {
-              value: "ABSENT",
-              label: "A",
-              checkedColor: "white",
-              style:
-                attendanceData[item.id] === "ABSENT"
-                  ? { backgroundColor: "#F44336" }
-                  : {},
-            },
-            {
-              value: "LEAVE",
-              label: "L",
-              checkedColor: "white",
-              style:
-                attendanceData[item.id] === "LEAVE"
-                  ? { backgroundColor: "#FF9800" }
-                  : {},
-            },
-            {
-              value: "UZUR",
-              label: "U",
-              checkedColor: "white",
-              style:
-                attendanceData[item.id] === "UZUR"
-                  ? { backgroundColor: "#9C27B0" }
-                  : {},
-            },
-          ]}
-          style={styles.segmentedButtons}
-        />
-      </Card.Content>
-    </Card>
+        </Card.Content>
+      </Card>
+    </TouchableOpacity>
   );
 
   return (
@@ -190,31 +146,106 @@ export default function MarkAttendanceScreenHuffaz({ navigation }: any) {
       <View style={styles.container}>
         <View style={styles.dateHeader}>
           <Text style={styles.dateText}>{new Date().toDateString()}</Text>
-          <Text style={styles.totalText}>Total: {huffazs.length}</Text>
+          <Text style={styles.totalText}>Total: {huffazList.length}</Text>
         </View>
 
         {loading ? (
           <ActivityIndicator size="large" style={styles.loader} />
         ) : (
           <FlatList
-            data={huffazs}
+            data={huffazList}
             keyExtractor={(item) => item.id}
             renderItem={renderHuffazItem}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
           />
         )}
+        {selectedHuffaz && (
+          <View style={styles.attendanceUI}>
+            <Text style={styles.huffazName}>
+              {selectedHuffaz.firstName} {selectedHuffaz.lastName}
+            </Text>
 
-        <Button
-          mode="contained"
-          onPress={submitAttendance}
-          loading={submitting}
-          disabled={loading || submitting || huffazs.length === 0}
-          style={styles.submitButton}
-          contentStyle={styles.submitButtonContent}
-        >
-          Submit Attendance
-        </Button>
+            <SegmentedButtons
+              density="small"
+              value={attendanceStatus}
+              onValueChange={handleStatusChange}
+              style={styles.segmentedButtonsContainer}
+              buttons={[
+                {
+                  value: "PRESENT",
+                  label: "P",
+                  checkedColor: "white",
+                  style: [
+                    styles.singleButton,
+                    {
+                      backgroundColor:
+                        attendanceStatus === "PRESENT" ? "#4CAF50" : "",
+                    },
+                  ],
+                },
+                {
+                  value: "HALF_DAY",
+                  label: "H",
+                  checkedColor: "white",
+                  style: [
+                    styles.singleButton,
+                    {
+                      backgroundColor:
+                        attendanceStatus === "HALF_DAY" ? "#FFEB3B" : "",
+                    },
+                  ],
+                },
+                {
+                  value: "ABSENT",
+                  label: "A",
+                  checkedColor: "white",
+                  style: [
+                    styles.singleButton,
+                    {
+                      backgroundColor:
+                        attendanceStatus === "ABSENT" ? "#F44336" : "",
+                    },
+                  ],
+                },
+                {
+                  value: "LEAVE",
+                  label: "L",
+                  checkedColor: "white",
+                  style: [
+                    styles.singleButton,
+                    {
+                      backgroundColor:
+                        attendanceStatus === "LEAVE" ? "#FF9800" : "",
+                    },
+                  ],
+                },
+                {
+                  value: "UZUR",
+                  label: "U",
+                  checkedColor: "white",
+                  style: [
+                    styles.singleButton,
+                    {
+                      backgroundColor:
+                        attendanceStatus === "UZUR" ? "#9C27B0" : "",
+                    },
+                  ],
+                },
+              ]}
+            />
+
+            <Button
+              mode="contained"
+              onPress={submitAttendance}
+              loading={submitting}
+              disabled={loading || submitting || huffazList.length === 0}
+              style={styles.submitButton}
+            >
+              Submit Attendance
+            </Button>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -289,5 +320,21 @@ const styles = StyleSheet.create({
   },
   submitButtonContent: {
     paddingVertical: 8,
+  },
+  attendanceUI: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    elevation: 2,
+  },
+  segmentedButtonsContainer: {
+    flexDirection: "row",
+    width: "100%",
+    marginVertical: 15,
+  },
+  singleButton: {
+    flex: 1,
+    minWidth: 0,
   },
 });

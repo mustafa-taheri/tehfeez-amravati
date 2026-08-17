@@ -49,8 +49,11 @@ const HuffazAttendanceScreen = ({ navigation, route }: any) => {
           response.data.message || "Unable to load current academic month.",
         );
       }
-    } catch (fetchError) {
-      console.error("fetchCurrentAcademicMonth error:", fetchError);
+    } catch (fetchError: any) {
+      console.error(
+        "fetchCurrentAcademicMonth error:",
+        fetchError?.response?.data?.message,
+      );
       setError("Unable to load current academic month. Please try again.");
     }
   };

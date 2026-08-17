@@ -31,10 +31,10 @@ export default function LoginScreen({ navigation }: any) {
 
       if (response.data.success) {
         const { user, tokens } = response.data.data;
-        await signIn(tokens.accessToken, user.role, user);
+        await signIn(tokens.accessToken, tokens.refreshToken, user.role, user);
       }
     } catch (err: any) {
-      console.log("Login error:", err);
+      console.log("Login error:", err?.response?.data?.message);
       setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);

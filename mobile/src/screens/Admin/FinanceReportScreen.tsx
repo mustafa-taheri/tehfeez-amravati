@@ -50,7 +50,7 @@ export default function FinanceReportScreen({ navigation }: any) {
 
       setReport(reportResponse.data.data);
     } catch (fetchError: any) {
-      console.error("fetchReport error:", fetchError);
+      console.error("fetchReport error:", fetchError?.response?.data?.message);
       setError("Failed to load finance report. Please try again.");
     } finally {
       setLoading(false);

@@ -105,9 +105,12 @@ export default function RecordSessionScreen({ route, navigation }: any) {
           { text: "OK", onPress: () => navigation.goBack() },
         ]);
       }
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "Failed to record session.");
+    } catch (error: any) {
+      console.error(error?.response?.data?.message);
+      Alert.alert(
+        "Error",
+        `Failed to record session. ${error?.response?.data?.message || ""}`,
+      );
     } finally {
       setLoading(false);
     }

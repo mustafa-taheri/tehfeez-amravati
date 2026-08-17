@@ -44,7 +44,7 @@ export default function ProfileScreen({ navigation }: any) {
         setError(response.data.message || "Unable to load profile.");
       }
     } catch (fetchError: any) {
-      console.error("fetchProfile error:", fetchError);
+      console.error("fetchProfile error:", fetchError?.response?.data?.message);
       setError("Unable to load profile. Please try again.");
     } finally {
       setLoading(false);

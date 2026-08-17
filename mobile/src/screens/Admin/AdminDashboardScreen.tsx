@@ -58,8 +58,11 @@ export default function AdminDashboardScreen({ navigation }: any) {
           absentToday,
         });
       }
-    } catch (error) {
-      console.error("Failed to fetch dashboard stats", error);
+    } catch (error: any) {
+      console.error(
+        "Failed to fetch dashboard stats",
+        error?.response?.data?.message,
+      );
     } finally {
       setLoading(false);
     }

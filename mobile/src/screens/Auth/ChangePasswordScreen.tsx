@@ -47,7 +47,10 @@ export default function ChangePasswordScreen({ navigation }: any) {
         setError(response.data.message || "Unable to update password.");
       }
     } catch (updateError: any) {
-      console.error("ChangePassword error:", updateError);
+      console.error(
+        "ChangePassword error:",
+        updateError?.response?.data?.message,
+      );
       setError(
         updateError.response?.data?.message || "Unable to update password.",
       );

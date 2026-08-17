@@ -31,8 +31,11 @@ export default function HuffazListScreen({ navigation }: any) {
         setHuffazList(response.data.data);
         setFiltered(response.data.data);
       }
-    } catch (error) {
-      console.error("Failed to fetch huffaz list", error);
+    } catch (error: any) {
+      console.error(
+        "Failed to fetch huffaz list",
+        error?.response?.data?.message,
+      );
     } finally {
       setLoading(false);
     }

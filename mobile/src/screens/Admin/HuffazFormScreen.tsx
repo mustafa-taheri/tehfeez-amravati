@@ -71,7 +71,7 @@ export default function HuffazFormScreen({ navigation, route }: any) {
         }
       }
     } catch (error: any) {
-      console.error("Failed to save Huffaz", error);
+      console.error("Failed to save Huffaz", error?.response?.data?.message);
       Alert.alert(
         "Error",
         error?.response?.data?.message || "Could not save Huffaz.",

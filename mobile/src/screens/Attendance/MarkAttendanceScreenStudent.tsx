@@ -49,8 +49,8 @@ const MarkAttendanceScreenStudent = ({ navigation }: any) => {
       if (monthResponse?.data?.success) {
         setCurrentAcademicMonth(monthResponse.data.data);
       }
-    } catch (error) {
-      console.error("Failed to fetch students", error);
+    } catch (error: any) {
+      console.error("Failed to fetch students", error?.response?.data?.message);
       Alert.alert("Error", "Could not load student list. Please try again.");
     } finally {
       setLoading(false);
@@ -94,7 +94,10 @@ const MarkAttendanceScreenStudent = ({ navigation }: any) => {
         Alert.alert("Error", "Failed to mark attendance. Please try again.");
       }
     } catch (error: any) {
-      console.error("Failed to submit attendance", error);
+      console.error(
+        "Failed to submit attendance",
+        error?.response?.data?.message,
+      );
       Alert.alert(
         "Error",
         `Could not submit attendance. ${error?.response?.data?.message || "An unknown error occurred."}`,

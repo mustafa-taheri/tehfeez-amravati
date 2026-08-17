@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Appbar, Button, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, StyleSheet } from "react-native";
+import { Alert, ScrollView, StyleSheet } from "react-native";
 import { Dropdown } from "react-native-paper-dropdown";
 import { Provider as PaperProvider } from "react-native-paper";
 import apiClient from "../../api/client";
@@ -29,8 +29,11 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
         console.error("Failed to fetch academic periods");
         periodsOptions = [];
       }
-    } catch (error) {
-      console.error("Failed to fetch academic periods", error);
+    } catch (error: any) {
+      console.error(
+        "Failed to fetch academic periods",
+        error?.response?.data?.message,
+      );
       periodsOptions = [];
     }
     setPeriodsOptions(
@@ -74,10 +77,14 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
       } else {
         alert("Failed to create academic month. Please try again.");
       }
-    } catch (error) {
-      console.error("Failed to create academic month", error);
-      alert(
-        "An error occurred while creating the academic month. Please try again.",
+    } catch (error: any) {
+      console.error(
+        "Failed to create academic month",
+        error?.response?.data?.message,
+      );
+      Alert.alert(
+        "Error",
+        `An error occurred while creating the academic month. Please try again. ${error?.response?.data?.message || ""}`,
       );
     } finally {
       setLoading(false);

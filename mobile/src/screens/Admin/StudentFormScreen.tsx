@@ -58,8 +58,8 @@ export default function StudentFormScreen({ navigation, route }: any) {
       if (response.data.success) {
         setMarhalas(response.data.data);
       }
-    } catch (error) {
-      console.error("Failed to fetch marhalas", error);
+    } catch (error: any) {
+      console.error("Failed to fetch marhalas", error?.response?.data?.message);
     }
   };
 
@@ -101,7 +101,7 @@ export default function StudentFormScreen({ navigation, route }: any) {
         }
       }
     } catch (error: any) {
-      console.error("Failed to save student", error);
+      console.error("Failed to save student", error?.response?.data?.message);
       Alert.alert(
         "Error",
         error?.response?.data?.message || "Could not save student.",
