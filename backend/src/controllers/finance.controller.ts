@@ -550,7 +550,7 @@ export const getFinanceReport = async (
       include: { marhalaFeeConfiguration: { include: { marhala: true } } },
     });
 
-    const totalStudents = feeCollections.length;
+    const totalStudents = await prisma.student.count();
     const totalConfiguredFees = roundToTwo(
       feeCollections.reduce(
         (sum, collection) => sum + Number(collection.configuredFee),
