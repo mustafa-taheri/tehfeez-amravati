@@ -180,7 +180,7 @@ export default function MarkAttendanceScreenHuffaz({ navigation }: any) {
                     styles.singleButton,
                     {
                       backgroundColor:
-                        attendanceStatus === "PRESENT" ? "#4CAF50" : "",
+                        attendanceStatus === "PRESENT" ? "#4CAF50" : "#fff",
                     },
                   ],
                 },
@@ -192,7 +192,7 @@ export default function MarkAttendanceScreenHuffaz({ navigation }: any) {
                     styles.singleButton,
                     {
                       backgroundColor:
-                        attendanceStatus === "HALF_DAY" ? "#FFEB3B" : "",
+                        attendanceStatus === "HALF_DAY" ? "#3688f4" : "#fff",
                     },
                   ],
                 },
@@ -204,7 +204,7 @@ export default function MarkAttendanceScreenHuffaz({ navigation }: any) {
                     styles.singleButton,
                     {
                       backgroundColor:
-                        attendanceStatus === "ABSENT" ? "#F44336" : "",
+                        attendanceStatus === "ABSENT" ? "#F44336" : "#fff",
                     },
                   ],
                 },
@@ -216,7 +216,7 @@ export default function MarkAttendanceScreenHuffaz({ navigation }: any) {
                     styles.singleButton,
                     {
                       backgroundColor:
-                        attendanceStatus === "LEAVE" ? "#FF9800" : "",
+                        attendanceStatus === "LEAVE" ? "#FF9800" : "#fff",
                     },
                   ],
                 },
@@ -228,7 +228,7 @@ export default function MarkAttendanceScreenHuffaz({ navigation }: any) {
                     styles.singleButton,
                     {
                       backgroundColor:
-                        attendanceStatus === "UZUR" ? "#9C27B0" : "",
+                        attendanceStatus === "UZUR" ? "#9C27B0" : "#fff",
                     },
                   ],
                 },

@@ -84,11 +84,11 @@ export default function HuffazFormScreen({ navigation, route }: any) {
   const confirmDelete = () => {
     Alert.alert(
       "Delete Huffaz",
-      "Are you sure you want to deactivate this Huffaz?",
+      "Are you sure you want to Delete this Huffaz?",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Yes, Deactivate",
+          text: "Yes, Delete",
           style: "destructive",
           onPress: deleteHuffaz,
         },
@@ -123,21 +123,21 @@ export default function HuffazFormScreen({ navigation, route }: any) {
       </Appbar.Header>
       <ScrollView contentContainerStyle={styles.container}>
         <TextInput
-          label="First Name"
+          label="First Name *"
           value={firstName}
           onChangeText={setFirstName}
           style={styles.field}
           mode="outlined"
         />
         <TextInput
-          label="Last Name"
+          label="Last Name *"
           value={lastName}
           onChangeText={setLastName}
           style={styles.field}
           mode="outlined"
         />
         <TextInput
-          label="Username"
+          label="Username *"
           value={username}
           onChangeText={setUsername}
           style={styles.field}
@@ -146,7 +146,7 @@ export default function HuffazFormScreen({ navigation, route }: any) {
         />
         {!existingHuffaz && (
           <TextInput
-            label="Password"
+            label="Password *"
             value={password}
             onChangeText={setPassword}
             style={styles.field}
@@ -163,7 +163,7 @@ export default function HuffazFormScreen({ navigation, route }: any) {
           keyboardType="email-address"
         />
         <TextInput
-          label="Mobile Number"
+          label="Mobile Number *"
           value={mobileNumber}
           onChangeText={setMobileNumber}
           style={styles.field}
@@ -198,7 +198,7 @@ export default function HuffazFormScreen({ navigation, route }: any) {
               disabled={loading}
               style={styles.deleteButton}
             >
-              Deactivate Huffaz
+              Delete Huffaz
             </Button>
           </>
         )}

@@ -5,6 +5,7 @@ import { Alert, ScrollView, StyleSheet } from "react-native";
 import { Dropdown } from "react-native-paper-dropdown";
 import { Provider as PaperProvider } from "react-native-paper";
 import apiClient from "../../api/client";
+import { validateDDMMYYYY } from "../../utils/dateValidation";
 
 const AcademicMonthFormScreen = ({ navigation, route }: any) => {
   const [monthName, setMonthName] = useState("");
@@ -52,13 +53,12 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
       !endDate ||
       !selectedPeriodId
     ) {
-      alert("Please fill in all fields.");
+      Alert.alert("Validation ", "Please fill in all fields.");
       return;
     }
     // Check if date format is valid (DD-MM-YYYY)
-    const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-    if (!dateRegex.test(startDate) || !dateRegex.test(endDate)) {
-      alert("Please enter dates in DD-MM-YYYY format.");
+    if (!validateDDMMYYYY(startDate) || !validateDDMMYYYY(endDate)) {
+      Alert.alert("Validation ", "Please enter dates in DD-MM-YYYY format.");
       return;
     }
 
@@ -75,7 +75,10 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
       if (response.data.success) {
         navigation.goBack();
       } else {
-        alert("Failed to create academic month. Please try again.");
+        Alert.alert(
+          "Error",
+          "Failed to create academic month. Please try again.",
+        );
       }
     } catch (error: any) {
       console.error(
@@ -99,14 +102,14 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
       </Appbar.Header>
       <ScrollView contentContainerStyle={styles.container}>
         <TextInput
-          label="Month Name"
+          label="Month Name *"
           value={monthName}
           onChangeText={setMonthName}
           style={styles.field}
           mode="outlined"
         />
         <TextInput
-          label="Month Number"
+          label="Month Number *"
           value={monthNumber}
           onChangeText={setMonthNumber}
           style={styles.field}
@@ -115,7 +118,7 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
 
         <PaperProvider>
           <Dropdown
-            label="Select Academic Period"
+            label="Select Academic Period *"
             options={periodsOptions}
             value={selectedPeriodId}
             onSelect={() => setSelectedPeriodId}
@@ -124,14 +127,14 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
           />
         </PaperProvider>
         <TextInput
-          label="Start Date (DD-MM-YYYY)"
+          label="Start Date (DD-MM-YYYY) *"
           value={startDate}
           onChangeText={setStartDate}
           style={styles.field}
           mode="outlined"
         />
         <TextInput
-          label="End Date (DD-MM-YYYY)"
+          label="End Date (DD-MM-YYYY) *"
           value={endDate}
           onChangeText={setEndDate}
           style={styles.field}

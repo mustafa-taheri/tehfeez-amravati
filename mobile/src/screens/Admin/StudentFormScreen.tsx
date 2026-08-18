@@ -11,6 +11,7 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
+import { validateDDMMYYYY } from "../../utils/dateValidation";
 
 const genders = ["MALE", "FEMALE"];
 const statuses = ["ACTIVE", "INACTIVE"];
@@ -34,12 +35,16 @@ export default function StudentFormScreen({ navigation, route }: any) {
   const [address, setAddress] = useState(existingStudent?.address || "");
   const [dateOfBirth, setDateOfBirth] = useState(
     existingStudent?.dateOfBirth
-      ? existingStudent.dateOfBirth.split("T")[0]
+      ? new Date(existingStudent?.dateOfBirth)
+          .toLocaleDateString("en-GB")
+          .replace(/\//g, "-")
       : "",
   );
   const [admissionDate, setAdmissionDate] = useState(
     existingStudent?.admissionDate
-      ? existingStudent.admissionDate.split("T")[0]
+      ? new Date(existingStudent?.admissionDate)
+          .toLocaleDateString("en-GB")
+          .replace(/\//g, "-")
       : "",
   );
   const [gender, setGender] = useState(existingStudent?.gender || "MALE");
@@ -69,6 +74,12 @@ export default function StudentFormScreen({ navigation, route }: any) {
       return;
     }
 
+    // Check if date format is valid (DD-MM-YYYY)
+    if (!validateDDMMYYYY(dateOfBirth) && !validateDDMMYYYY(admissionDate)) {
+      Alert.alert("Validation", "Please enter dates in DD-MM-YYYY format.");
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
@@ -87,6 +98,8 @@ export default function StudentFormScreen({ navigation, route }: any) {
       };
 
       if (existingStudent) {
+        console.log("Existing Student Called", existingStudent.id, payload);
+
         const response = await apiClient.put(
           `/students/${existingStudent.id}`,
           payload,
@@ -95,6 +108,8 @@ export default function StudentFormScreen({ navigation, route }: any) {
           navigation.goBack();
         }
       } else {
+        console.log("New Student", payload);
+
         const response = await apiClient.post("/students", payload);
         if (response.data.success) {
           navigation.goBack();
@@ -121,21 +136,21 @@ export default function StudentFormScreen({ navigation, route }: any) {
       </Appbar.Header>
       <ScrollView contentContainerStyle={styles.container}>
         <TextInput
-          label="ITS Number"
+          label="ITS Number *"
           value={itsNumber}
           onChangeText={setItsNumber}
           style={styles.field}
           mode="outlined"
         />
         <TextInput
-          label="First Name"
+          label="First Name *"
           value={firstName}
           onChangeText={setFirstName}
           style={styles.field}
           mode="outlined"
         />
         <TextInput
-          label="Last Name"
+          label="Last Name *"
           value={lastName}
           onChangeText={setLastName}
           style={styles.field}
@@ -173,7 +188,7 @@ export default function StudentFormScreen({ navigation, route }: any) {
           multiline
         />
         <TextInput
-          label="Date of Birth"
+          label="Date of Birth *"
           value={dateOfBirth}
           onChangeText={setDateOfBirth}
           style={styles.field}
@@ -181,12 +196,13 @@ export default function StudentFormScreen({ navigation, route }: any) {
           placeholder="DD-MM-YYYY"
         />
         <TextInput
-          label="Admission Date"
+          label="Admission Date *"
           value={admissionDate}
           onChangeText={setAdmissionDate}
           style={styles.field}
           mode="outlined"
           placeholder="DD-MM-YYYY"
+          readOnly={existingStudent ? true : false}
         />
 
         <Card style={styles.card}>
@@ -210,7 +226,7 @@ export default function StudentFormScreen({ navigation, route }: any) {
 
         <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.sectionLabel}>Marhala</Text>
+            <Text style={styles.sectionLabel}>Marhala *</Text>
             {marhalas.map((marhala) => (
               <Button
                 key={marhala.id}

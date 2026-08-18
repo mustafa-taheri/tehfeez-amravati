@@ -220,12 +220,12 @@ export default function HuffazDashboardScreen({ navigation }: any) {
                 color="#009688"
                 onPress={() => navigation.navigate("MarkAttendance")}
               />
-              <ActionButton
+              {/* <ActionButton
                 title="Record Session"
                 icon="book-open-variant"
                 color="#FF9800"
                 onPress={() => navigation.navigate("StudentList")} // Route to student list to select a student for recording
-              />
+              /> */}
               <ActionButton
                 title="My Students"
                 icon="account-group"
