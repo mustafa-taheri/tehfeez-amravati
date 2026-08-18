@@ -33,9 +33,9 @@ export default function StudentListScreen({ navigation }: any) {
     fetchStudents();
   }, []);
 
-  const fetchStudents = async () => {
+  const fetchStudents = async (isRefreshing = false) => {
     try {
-      setLoading(true);
+      if (!isRefreshing) setLoading(true);
       const response = await apiClient.get("/students");
       if (response.data.success) {
         setStudents(response.data.data);
@@ -44,7 +44,7 @@ export default function StudentListScreen({ navigation }: any) {
     } catch (error: any) {
       console.error("Failed to fetch students", error?.response?.data?.message);
     } finally {
-      setLoading(false);
+      if (!isRefreshing) setLoading(false);
     }
   };
 
@@ -93,7 +93,7 @@ export default function StudentListScreen({ navigation }: any) {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchStudents();
+    await fetchStudents(true);
     setRefreshing(false);
   }, []);
 
@@ -134,7 +134,7 @@ export default function StudentListScreen({ navigation }: any) {
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
-                onRefresh={() => onRefresh()}
+                onRefresh={onRefresh}
                 colors={[colors.primary]} // Android spinner color
                 progressBackgroundColor={colors.elevation.level2} // Android card background
                 tintColor={colors.primary} // iOS spinner color

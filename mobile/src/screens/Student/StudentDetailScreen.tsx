@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, Alert } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Alert,
+  RefreshControl,
+} from "react-native";
 import {
   Title,
   Card,
@@ -9,6 +15,7 @@ import {
   Appbar,
   ActivityIndicator,
   Divider,
+  useTheme,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
@@ -18,21 +25,28 @@ export default function StudentDetailScreen({ route, navigation }: any) {
   const [student, setStudent] = useState(initialStudent);
   const [loading, setLoading] = useState(!initialStudent);
   const [recentSessions, setRecentSessions] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const { colors } = useTheme();
 
   useEffect(() => {
-    fetchStudentData();
+    if (!initialStudent) {
+      fetchStudentData(false);
+    }
     fetchRecentSessions();
   }, []);
 
-  const fetchStudentData = async () => {
-    if (initialStudent) return;
+  const fetchStudentData = async (forceRefresh = false) => {
+    if (initialStudent && !forceRefresh) return;
     try {
       const response = await apiClient.get(`/students/${studentId}`);
       if (response.data.success) {
         setStudent(response.data.data);
       }
     } catch (error: any) {
-      console.error(error?.response?.data?.message);
+      console.error(
+        "Failed to fetch student data:",
+        error?.response?.data?.message,
+      );
     } finally {
       setLoading(false);
     }
@@ -54,6 +68,12 @@ export default function StudentDetailScreen({ route, navigation }: any) {
     }
   };
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([fetchRecentSessions(), fetchStudentData(true)]);
+    setRefreshing(false);
+  }, [studentId]);
+
   if (loading || !student) {
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
@@ -69,19 +89,33 @@ export default function StudentDetailScreen({ route, navigation }: any) {
         <Appbar.Content title="Student Details" />
       </Appbar.Header>
 
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[colors.primary]}
+            progressBackgroundColor={colors.elevation.level2}
+            tintColor={colors.primary}
+          />
+        }
+      >
         <View style={styles.headerProfile}>
           <Avatar.Text
             size={80}
-            label={student.firstName.charAt(0)}
+            label={student?.firstName ? student.firstName.charAt(0) : "?"}
             style={styles.avatar}
           />
           <Title style={styles.name}>
-            {student.firstName} {student.lastName}
+            {student?.firstName || ""} {student?.lastName || ""}
           </Title>
-          <Text style={styles.itsNumber}>ITS: {student.itsNumber}</Text>
+          <Text style={styles.itsNumber}>
+            ITS: {student?.itsNumber || "N/A"}
+          </Text>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{student.status || "ACTIVE"}</Text>
+            <Text style={styles.badgeText}>{student?.status || "ACTIVE"}</Text>
           </View>
         </View>
 
@@ -90,10 +124,10 @@ export default function StudentDetailScreen({ route, navigation }: any) {
             <Title style={styles.sectionTitle}>Contact Info</Title>
             <Divider style={styles.divider} />
             <Text style={styles.infoText}>
-              Father: {student.fatherName || "N/A"}
+              Father: {student?.fatherName || "N/A"}
             </Text>
             <Text style={styles.infoText}>
-              Parent Mobile: {student.parentMobileNumber}
+              Parent Mobile: {student?.parentMobileNumber || "N/A"}
             </Text>
           </Card.Content>
         </Card>

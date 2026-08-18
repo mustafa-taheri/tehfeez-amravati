@@ -41,11 +41,11 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 28,
+    marginBottom: 30,
   },
   logo: {
-    width: 140,
-    height: 140,
+    width: 240,
+    height: 240,
   },
   title: {
     fontSize: 24,
