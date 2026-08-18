@@ -310,14 +310,10 @@ model QuranSession {
   sessionType     SessionType @default(MIXED)
   siparaNumber    Int?        @db.SmallInt
   surahName       String?     @db.VarChar(150)
-  startAyah       Int?        @db.Integer
-  endAyah         Int?        @db.Integer
   murajaahJuz     Int?        @db.SmallInt
   murajaahMarks   Decimal?    @db.Decimal(5, 2)
   juzHaaliMarks   Decimal?    @db.Decimal(5, 2)
-  jadeedStartAyah Int?        @db.Integer
-  jadeedEndAyah   Int?        @db.Integer
-  tasmeeMarks     Decimal?    @db.Decimal(5, 2)
+  jadeedStartAyah String?     @db.Varchar(20)
   hifzProgress    String?     @db.VarChar(200)
   durationMinutes Int?        @db.SmallInt
   remarks         String?     @db.Text

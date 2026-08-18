@@ -12,6 +12,8 @@ export const recordQuranSession = async (
   req: AuthRequest,
   res: Response,
 ): Promise<void> => {
+  console.log(req.body);
+
   try {
     const {
       studentId,
@@ -20,14 +22,14 @@ export const recordQuranSession = async (
       sessionType,
       siparaNumber,
       surahName,
-      startAyah,
-      endAyah,
+      // startAyah,
+      // endAyah,
       murajaahJuz,
       murajaahMarks,
       juzHaaliMarks,
       jadeedStartAyah,
-      jadeedEndAyah,
-      tasmeeMarks,
+      // jadeedEndAyah,
+      // tasmeeMarks,
       hifzProgress,
       durationMinutes,
       remarks,
@@ -51,14 +53,14 @@ export const recordQuranSession = async (
         sessionType,
         siparaNumber,
         surahName,
-        startAyah,
-        endAyah,
+        // startAyah,
+        // endAyah,
         murajaahJuz,
         murajaahMarks,
         juzHaaliMarks,
         jadeedStartAyah,
-        jadeedEndAyah,
-        tasmeeMarks,
+        // jadeedEndAyah,
+        // tasmeeMarks,
         hifzProgress,
         durationMinutes,
         remarks,
@@ -72,10 +74,11 @@ export const recordQuranSession = async (
       data: session,
     });
   } catch (error: any) {
-    console.error(error);
+    console.log(error);
     res.status(500).json({
       success: false,
-      message: "Internal server error.",
+      message:
+        "Sorry.. Unable to record session at the moment. Internal server error.",
       code: "INTERNAL_SERVER_ERROR",
     });
   }

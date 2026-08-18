@@ -24,3 +24,18 @@ export const getMarhalaList = async (
     });
   }
 };
+
+export const createMarhalaFeeConfiguration = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+  } catch (error: any) {
+    console.error("createMarhalaFeeConfiguration error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};

@@ -160,10 +160,10 @@ export const createStudent = async (
         parentMobileNumber: data.parentMobileNumber,
         address: data.address,
         dateOfBirth: data.dateOfBirth
-          ? dayjs(data.dateOfBirth, "DD-MM-YYYY", true).toDate()
+          ? dayjs.utc(data.dateOfBirth, "DD-MM-YYYY", true).toDate()
           : null,
         admissionDate: data.admissionDate
-          ? dayjs(data.admissionDate, "DD-MM-YYYY", true).toDate()
+          ? dayjs.utc(data.admissionDate, "DD-MM-YYYY", true).toDate()
           : dayjs().toDate(),
         gender: data.gender || "MALE",
         currentMarhala: {
@@ -237,9 +237,12 @@ export const updateStudent = async (
       data: updated,
     });
   } catch (error: any) {
+    console.log(error);
+
     res.status(500).json({
       success: false,
-      message: "Internal server error.",
+      message:
+        "Sorry.. Unable to update student details. Internal server error.",
       code: "INTERNAL_SERVER_ERROR",
     });
   }
