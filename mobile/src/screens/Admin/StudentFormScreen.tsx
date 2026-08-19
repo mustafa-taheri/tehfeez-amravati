@@ -73,8 +73,6 @@ export default function StudentFormScreen({ navigation, route }: any) {
       Alert.alert("Validation", "Please fill in the required student details.");
       return;
     }
-    console.log(dateOfBirth);
-    console.log(validateDDMMYYYY(dateOfBirth));
 
     // Check if date format is valid (DD-MM-YYYY)
     if (!validateDDMMYYYY(dateOfBirth) || !validateDDMMYYYY(admissionDate)) {
