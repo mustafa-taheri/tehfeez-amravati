@@ -73,10 +73,15 @@ export default function StudentFormScreen({ navigation, route }: any) {
       Alert.alert("Validation", "Please fill in the required student details.");
       return;
     }
+    console.log(dateOfBirth);
+    console.log(validateDDMMYYYY(dateOfBirth));
 
     // Check if date format is valid (DD-MM-YYYY)
-    if (!validateDDMMYYYY(dateOfBirth) && !validateDDMMYYYY(admissionDate)) {
-      Alert.alert("Validation", "Please enter dates in DD-MM-YYYY format.");
+    if (!validateDDMMYYYY(dateOfBirth) || !validateDDMMYYYY(admissionDate)) {
+      Alert.alert(
+        "Validation",
+        "Please enter valid date in DD-MM-YYYY format.",
+      );
       return;
     }
 
@@ -202,7 +207,7 @@ export default function StudentFormScreen({ navigation, route }: any) {
           style={styles.field}
           mode="outlined"
           placeholder="DD-MM-YYYY"
-          readOnly={existingStudent ? true : false}
+          disabled={existingStudent ? true : false}
         />
 
         <Card style={styles.card}>

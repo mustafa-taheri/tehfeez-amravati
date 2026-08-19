@@ -147,7 +147,7 @@ export default function RecordSessionScreen({ route, navigation }: any) {
           onChangeText={setSessionDate}
           mode="outlined"
           style={styles.input}
-          readOnly
+          disabled
         />
 
         <TextInput

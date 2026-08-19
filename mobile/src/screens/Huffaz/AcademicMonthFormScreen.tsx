@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Appbar, Button, TextInput } from "react-native-paper";
+import { Appbar, Button, Portal, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Alert, ScrollView, StyleSheet } from "react-native";
 import { Dropdown } from "react-native-paper-dropdown";
@@ -23,7 +23,7 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
   const fetchAcademicPeriods = async () => {
     let periodsOptions = [];
     try {
-      const periodsResponse = await apiClient.get("/academic-periods");
+      const periodsResponse = await apiClient.get("/academic-months/periods");
       if (periodsResponse?.data?.success) {
         periodsOptions = periodsResponse?.data?.data;
       } else {
@@ -95,62 +95,64 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Appbar.Header style={styles.appBar}>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title={"Add Academic Month"} />
-      </Appbar.Header>
-      <ScrollView contentContainerStyle={styles.container}>
-        <TextInput
-          label="Month Name *"
-          value={monthName}
-          onChangeText={setMonthName}
-          style={styles.field}
-          mode="outlined"
-        />
-        <TextInput
-          label="Month Number *"
-          value={monthNumber}
-          onChangeText={setMonthNumber}
-          style={styles.field}
-          mode="outlined"
-        />
-
-        <PaperProvider>
-          <Dropdown
-            label="Select Academic Period *"
-            options={periodsOptions}
-            value={selectedPeriodId}
-            onSelect={() => setSelectedPeriodId}
-            menuContentStyle={styles.field}
-            mode="outlined"
-          />
-        </PaperProvider>
-        <TextInput
-          label="Start Date (DD-MM-YYYY) *"
-          value={startDate}
-          onChangeText={setStartDate}
-          style={styles.field}
-          mode="outlined"
-        />
-        <TextInput
-          label="End Date (DD-MM-YYYY) *"
-          value={endDate}
-          onChangeText={setEndDate}
-          style={styles.field}
-          mode="outlined"
-        />
-        <Button
-          mode="contained"
-          onPress={handleSubmit}
-          loading={loading}
-          disabled={loading}
-          style={styles.submitButton}
-        >
-          Submit
-        </Button>
-      </ScrollView>
-    </SafeAreaView>
+    <PaperProvider>
+      <Portal.Host>
+        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+          <Appbar.Header style={styles.appBar}>
+            <Appbar.BackAction onPress={() => navigation.goBack()} />
+            <Appbar.Content title={"Add Academic Month"} />
+          </Appbar.Header>
+          <ScrollView contentContainerStyle={styles.container}>
+            <Text style={styles.label}>Select Academic Period</Text>
+            <Dropdown
+              // label="Select Academic Period *"
+              options={periodsOptions}
+              value={selectedPeriodId}
+              onSelect={setSelectedPeriodId}
+              // menuContentStyle={styles.field}
+              mode="outlined"
+            />
+            <TextInput
+              label="Month Name *"
+              value={monthName}
+              onChangeText={setMonthName}
+              style={styles.field}
+              mode="outlined"
+            />
+            <TextInput
+              label="Month Number *"
+              value={monthNumber}
+              onChangeText={setMonthNumber}
+              style={styles.field}
+              mode="outlined"
+            />
+            <TextInput
+              label="Start Date (DD-MM-YYYY) *"
+              value={startDate}
+              onChangeText={setStartDate}
+              style={styles.field}
+              mode="outlined"
+            />
+            <TextInput
+              label="End Date (DD-MM-YYYY) *"
+              value={endDate}
+              onChangeText={setEndDate}
+              style={styles.field}
+              mode="outlined"
+            />
+            <Button
+              mode="contained"
+              onPress={handleSubmit}
+              loading={loading}
+              disabled={loading}
+              style={styles.submitButton}
+            >
+              Submit
+            </Button>
+          </ScrollView>
+        </SafeAreaView>
+      </Portal.Host>
+    </PaperProvider>
   );
 };
 
@@ -162,4 +164,5 @@ const styles = StyleSheet.create({
   container: { padding: 16, paddingBottom: 40 },
   field: { marginBottom: 14, backgroundColor: "#fff" },
   submitButton: { marginTop: 10, borderRadius: 8 },
+  label: { fontSize: 14, color: "#666", marginBottom: 6, marginTop: 12 },
 });

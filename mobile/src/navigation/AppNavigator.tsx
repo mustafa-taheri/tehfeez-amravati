@@ -25,6 +25,15 @@ import HuffazAttendanceScreen from "../screens/Huffaz/HuffazAttendanceScreen";
 import MarkAttendanceScreenHuffaz from "../screens/Attendance/MarkAttendanceScreenHuffaz";
 import MarkAttendanceScreenStudent from "../screens/Attendance/MarkAttendanceScreenStudent";
 
+import MarhalaFeeConfigListScreen from "../screens/Admin/MarhalaFeeConfigListScreen";
+import MarhalaFeeConfigFormScreen from "../screens/Admin/MarhalaFeeConfigFormScreen";
+import FeeCollectionListScreen from "../screens/Admin/FeeCollectionListScreen";
+import FeeCollectionFormScreen from "../screens/Admin/FeeCollectionFormScreen";
+import FeeCollectionDetailScreen from "../screens/Admin/FeeCollectionDetailScreen";
+import SettlementListScreen from "../screens/Admin/SettlementListScreen";
+import SettlementDetailScreen from "../screens/Admin/SettlementDetailScreen";
+import GenerateSettlementScreen from "../screens/Admin/GenerateSettlementScreen";
+import HuffazPayableListScreen from "../screens/Admin/HuffazPayableListScreen";
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -105,6 +114,17 @@ export default function AppNavigator() {
               name="HuffazAttendanceList"
               component={HuffazAttendanceScreen}
             />
+
+            {/* New Features */}
+            <Stack.Screen name="MarhalaFeeConfigList" component={MarhalaFeeConfigListScreen} />
+            <Stack.Screen name="MarhalaFeeConfigForm" component={MarhalaFeeConfigFormScreen} />
+            <Stack.Screen name="FeeCollectionList" component={FeeCollectionListScreen} />
+            <Stack.Screen name="FeeCollectionForm" component={FeeCollectionFormScreen} />
+            <Stack.Screen name="FeeCollectionDetail" component={FeeCollectionDetailScreen} />
+            <Stack.Screen name="SettlementList" component={SettlementListScreen} />
+            <Stack.Screen name="SettlementDetail" component={SettlementDetailScreen} />
+            <Stack.Screen name="GenerateSettlement" component={GenerateSettlementScreen} />
+            <Stack.Screen name="HuffazPayableList" component={HuffazPayableListScreen} />
           </Stack.Group>
         )}
       </Stack.Navigator>

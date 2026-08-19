@@ -42,6 +42,27 @@ export const createAcademicPeriod = async (
   }
 };
 
+export const getAcademicPeriods = async (
+  _req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const periods = await prisma.academicPeriod.findMany({
+      orderBy: { startDate: "desc" },
+    });
+    res.status(200).json({
+      success: true,
+      data: periods,
+    });
+  } catch (error: any) {
+    console.error("getAcademicPeriods error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
+  }
+};
+
 export const getCurrentAcademicMonth = async (
   _req: Request,
   res: Response,

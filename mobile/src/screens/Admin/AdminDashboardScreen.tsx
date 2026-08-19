@@ -43,7 +43,11 @@ export default function AdminDashboardScreen({ navigation }: any) {
         apiClient.get("/students"),
         apiClient
           .get("/attendance/student", {
-            params: { attendanceDate: new Date().toISOString() },
+            params: {
+              attendanceDate: new Date()
+                .toLocaleDateString("en-GB")
+                .replace(/\//g, "-"),
+            },
           })
           .catch(() => null),
       ]);
@@ -208,6 +212,30 @@ export default function AdminDashboardScreen({ navigation }: any) {
                 icon="calendar-month"
                 color="#795548"
                 onPress={() => navigation.navigate("AcademicMonthForm")}
+              />
+              <ActionButton
+                title="Fee Configs"
+                icon="cash-edit"
+                color="#FF5722"
+                onPress={() => navigation.navigate("MarhalaFeeConfigList")}
+              />
+              <ActionButton
+                title="Fee Collections"
+                icon="cash-register"
+                color="#00BCD4"
+                onPress={() => navigation.navigate("FeeCollectionList")}
+              />
+              <ActionButton
+                title="Settlements"
+                icon="bank-transfer"
+                color="#607D8B"
+                onPress={() => navigation.navigate("SettlementList")}
+              />
+              <ActionButton
+                title="Huffaz Payables"
+                icon="wallet"
+                color="#E91E63"
+                onPress={() => navigation.navigate("HuffazPayableList")}
               />
             </View>
 

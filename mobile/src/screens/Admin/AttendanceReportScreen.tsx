@@ -135,38 +135,36 @@ export default function AttendanceReportScreen({ navigation, route }: any) {
               </Card>
             </View>
 
-            <Title style={styles.listTitle}>Records</Title>
-            <FlatList
-              data={records}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <Card style={styles.recordCard}>
-                  <Card.Content>
-                    <View style={styles.recordHeader}>
-                      <Text style={styles.recordDate}>
-                        {item.attendanceDate}
-                      </Text>
-                      <Text>{item.attendanceStatus}</Text>
-                    </View>
-                    {item.remarks ? <Text>Note: {item.remarks}</Text> : null}
-                  </Card.Content>
-                </Card>
-              )}
-              ListEmptyComponent={
-                <Text style={styles.emptyText}>
-                  No attendance records found.
-                </Text>
-              }
-              contentContainerStyle={styles.listContent}
-            />
+            {studentId && <Title style={styles.listTitle}>Records</Title>}
+            {studentId &&
+              records.map((item, index) => {
+                return (
+                  <Card key={index} style={styles.recordCard}>
+                    <Card.Content>
+                      <View style={styles.recordHeader}>
+                        <Text style={styles.recordDate}>
+                          {item.attendanceDate}
+                        </Text>
+                        <Text>{item.attendanceStatus}</Text>
+                      </View>
+                      {item.remarks ? <Text>Note: {item.remarks}</Text> : null}
+                    </Card.Content>
+                  </Card>
+                );
+              })}
+            {studentId && records.length === 0 && (
+              <Text style={styles.emptyText}>No attendance records found.</Text>
+            )}
+            {/* contentContainerStyle={styles.listContent}
+            /> */}
 
-            <Button
+            {/* <Button
               mode="contained"
               onPress={() => fetchAttendance()}
               style={styles.reloadButton}
             >
               Refresh
-            </Button>
+            </Button> */}
           </>
         )}
       </ScrollView>
