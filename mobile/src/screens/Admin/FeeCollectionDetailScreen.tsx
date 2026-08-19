@@ -33,12 +33,14 @@ export default function FeeCollectionDetailScreen({ navigation, route }: any) {
   const fetchDetail = async (isRefreshing = false) => {
     try {
       if (!isRefreshing) setLoading(true);
-      // We don't have a specific get by ID for fee collections, 
-      // but we can fetch all and filter, or add an endpoint. 
+      // We don't have a specific get by ID for fee collections,
+      // but we can fetch all and filter, or add an endpoint.
       // Assuming GET /finance/fee-collections returns an array, let's fetch all and find it for now.
       const response = await apiClient.get(`/finance/fee-collections`);
       if (response.data.success) {
-        const found = response.data.data.find((c: any) => c.id === collectionId);
+        const found = response.data.data.find(
+          (c: any) => c.id === collectionId,
+        );
         setCollection(found);
         if (found) {
           setPaymentAmount(found.outstandingAmount.toString());
@@ -62,6 +64,8 @@ export default function FeeCollectionDetailScreen({ navigation, route }: any) {
     setRecording(true);
     try {
       const payload = {
+        studentId: collection?.studentId,
+        academicMonthId: collection?.academicMonth?.id,
         studentFeeCollectionId: collectionId,
         amount: parseFloat(paymentAmount),
         paymentMode,
@@ -126,37 +130,49 @@ export default function FeeCollectionDetailScreen({ navigation, route }: any) {
         <Card style={styles.card}>
           <Card.Content>
             <Title>{collection.student.fullName}</Title>
-            <Text style={styles.subText}>ITS: {collection.student.itsNumber}</Text>
+            <Text style={styles.subText}>
+              ITS: {collection?.student?.itsNumber}
+            </Text>
             <Divider style={styles.divider} />
-            
+
             <View style={styles.row}>
               <Text>Academic Month:</Text>
-              <Text style={styles.bold}>{collection.academicMonth.name}</Text>
+              <Text style={styles.bold}>{collection?.academicMonth?.name}</Text>
             </View>
             <View style={styles.row}>
               <Text>Configured Fee:</Text>
-              <Text style={styles.bold}>₹{collection.configuredFee}</Text>
+              <Text style={styles.bold}>₹{collection?.configuredFee}</Text>
             </View>
             <View style={styles.row}>
               <Text>Discount:</Text>
-              <Text style={styles.bold}>₹{collection.discountAmount}</Text>
+              <Text style={styles.bold}>₹{collection?.discountAmount}</Text>
             </View>
             <View style={styles.row}>
               <Text>Waived:</Text>
-              <Text style={styles.bold}>₹{collection.waivedAmount}</Text>
+              <Text style={styles.bold}>₹{collection?.waivedAmount}</Text>
             </View>
             <Divider style={styles.divider} />
             <View style={styles.row}>
               <Text>Total Paid:</Text>
-              <Text style={[styles.bold, { color: "#4CAF50" }]}>₹{collection.totalReceivedAmount}</Text>
+              <Text style={[styles.bold, { color: "#4CAF50" }]}>
+                ₹{collection?.totalReceivedAmount}
+              </Text>
             </View>
             <View style={styles.row}>
               <Text>Outstanding:</Text>
-              <Text style={[styles.bold, { color: isPaid ? "#4CAF50" : "#F44336" }]}>₹{collection.outstandingAmount}</Text>
+              <Text
+                style={[styles.bold, { color: isPaid ? "#4CAF50" : "#F44336" }]}
+              >
+                ₹{collection.outstandingAmount}
+              </Text>
             </View>
             <View style={styles.row}>
               <Text>Status:</Text>
-              <Text style={[styles.bold, { color: isPaid ? "#4CAF50" : "#F44336" }]}>{collection.paymentStatus}</Text>
+              <Text
+                style={[styles.bold, { color: isPaid ? "#4CAF50" : "#F44336" }]}
+              >
+                {collection.paymentStatus}
+              </Text>
             </View>
           </Card.Content>
         </Card>
@@ -212,7 +228,11 @@ const styles = StyleSheet.create({
   card: { marginBottom: 16, backgroundColor: "#fff", borderRadius: 12 },
   subText: { color: "#666", marginBottom: 8 },
   divider: { marginVertical: 12 },
-  row: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
   bold: { fontWeight: "bold" },
   input: { marginBottom: 12, backgroundColor: "#fff" },
   button: { marginTop: 8, borderRadius: 8, paddingVertical: 4 },

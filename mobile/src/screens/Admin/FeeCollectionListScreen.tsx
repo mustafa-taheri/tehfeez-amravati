@@ -14,6 +14,7 @@ import {
   useTheme,
   Avatar,
   FAB,
+  Portal,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
@@ -136,57 +137,58 @@ export default function FeeCollectionListScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Appbar.Header style={styles.appBar}>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Fee Collections" />
-      </Appbar.Header>
+    <PaperProvider>
+      <Portal.Host>
+        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+          <Appbar.Header style={styles.appBar}>
+            <Appbar.BackAction onPress={() => navigation.goBack()} />
+            <Appbar.Content title="Fee Collections" />
+          </Appbar.Header>
 
-      <View style={styles.container}>
-        <PaperProvider>
-          <Dropdown
-            label="Select Academic Month"
-            options={academicMonthsOptions}
-            value={selectedMonth}
-            onSelect={setSelectedMonth}
-            mode="outlined"
-          />
-        </PaperProvider>
-
-        {loading ? (
-          <ActivityIndicator size="large" style={styles.loader} />
-        ) : (
-          <FlatList
-            data={collections}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={styles.list}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>
-                No fee collections for this month.
-              </Text>
-            }
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={() => onRefresh()}
-                colors={[colors.primary]}
-                progressBackgroundColor={colors.elevation.level2}
-                tintColor={colors.primary}
+          <View style={styles.container}>
+            <Dropdown
+              label="Select Academic Month"
+              options={academicMonthsOptions}
+              value={selectedMonth}
+              onSelect={setSelectedMonth}
+              mode="outlined"
+            />
+            {loading ? (
+              <ActivityIndicator size="large" style={styles.loader} />
+            ) : (
+              <FlatList
+                data={collections}
+                keyExtractor={(item) => item.id}
+                renderItem={renderItem}
+                contentContainerStyle={styles.list}
+                ListEmptyComponent={
+                  <Text style={styles.emptyText}>
+                    No fee collections for this month.
+                  </Text>
+                }
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={() => onRefresh()}
+                    colors={[colors.primary]}
+                    progressBackgroundColor={colors.elevation.level2}
+                    tintColor={colors.primary}
+                  />
+                }
               />
-            }
-          />
-        )}
+            )}
 
-        <FAB
-          icon="plus"
-          style={[styles.fab, { backgroundColor: colors.primary }]}
-          color="#fff"
-          onPress={() => navigation.navigate("FeeCollectionForm")}
-        />
-      </View>
-    </SafeAreaView>
+            <FAB
+              icon="plus"
+              style={[styles.fab, { backgroundColor: colors.primary }]}
+              color="#fff"
+              onPress={() => navigation.navigate("FeeCollectionForm")}
+            />
+          </View>
+        </SafeAreaView>
+      </Portal.Host>
+    </PaperProvider>
   );
 }
 

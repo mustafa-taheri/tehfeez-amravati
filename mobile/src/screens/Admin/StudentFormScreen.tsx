@@ -45,7 +45,7 @@ export default function StudentFormScreen({ navigation, route }: any) {
       ? new Date(existingStudent?.admissionDate)
           .toLocaleDateString("en-GB")
           .replace(/\//g, "-")
-      : "",
+      : new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
   );
   const [gender, setGender] = useState(existingStudent?.gender || "MALE");
   const [currentMarhalaId, setCurrentMarhalaId] = useState(

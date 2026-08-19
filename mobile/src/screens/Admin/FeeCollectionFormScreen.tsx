@@ -131,7 +131,7 @@ export default function FeeCollectionFormScreen({ navigation }: any) {
             <Text style={styles.label}>Select Student *</Text>
 
             <Dropdown
-              // label="Select Student *"
+              label={<Text style={{ fontSize: 16 }}>{"Student"}</Text>}
               options={studentsOptions}
               value={studentId}
               onSelect={setStudentId}
@@ -140,7 +140,7 @@ export default function FeeCollectionFormScreen({ navigation }: any) {
 
             <Text style={styles.label}>Select Academic Month *</Text>
             <Dropdown
-              // label="Select Month *"
+              label={<Text style={{ fontSize: 16 }}>{"Academic Month"}</Text>}
               options={academicMonthsOptions}
               value={academicMonthId}
               onSelect={setAcademicMonthId}
@@ -149,7 +149,9 @@ export default function FeeCollectionFormScreen({ navigation }: any) {
 
             <Text style={styles.label}>Select Fee Configuration *</Text>
             <Dropdown
-              // label="Select Configuration *"
+              label={
+                <Text style={{ fontSize: 16 }}>{"Fee Configuration"}</Text>
+              }
               options={feeConfigsOptions}
               value={marhalaFeeConfigurationId}
               onSelect={handleConfigSelect}
