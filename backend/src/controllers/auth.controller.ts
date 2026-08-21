@@ -26,7 +26,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const user = await prisma.user.findUnique({ where: { username } });
 
     if (!user) {
-      res.status(401).json({
+      res.status(400).json({
         success: false,
         message: "Invalid username or password.",
         code: "INVALID_CREDENTIALS",
@@ -46,7 +46,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const isMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!isMatch) {
-      res.status(401).json({
+      res.status(400).json({
         success: false,
         message: "Invalid username or password.",
         code: "INVALID_CREDENTIALS",
