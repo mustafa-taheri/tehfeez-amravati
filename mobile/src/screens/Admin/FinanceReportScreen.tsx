@@ -166,33 +166,35 @@ export default function FinanceReportScreen({ navigation }: any) {
               <Card.Content>
                 <Title style={styles.cardTitle}>Payables</Title>
                 <Divider style={styles.divider} />
-                {report.huffazPayables.length === 0 ? (
+                {report?.monthlyHuffazPayables?.huffazPayables.length === 0 ? (
                   <Text style={styles.emptyText}>
                     No Huffaz payables found.
                   </Text>
                 ) : (
-                  report.huffazPayables.map((payable: any) => (
-                    <Card key={payable.userId} style={styles.payableCard}>
-                      <Card.Content>
-                        <View style={styles.payableHeader}>
-                          <Text style={styles.payableName}>
-                            {payable.fullName}
-                          </Text>
-                          <Text style={styles.payableAmount}>
-                            ₹ {payable.calculatedAmount}
-                          </Text>
-                        </View>
-                        <View style={styles.row}>
-                          <Text>Attendance Days</Text>
-                          <Text>{payable.attendanceDays}</Text>
-                        </View>
-                        <View style={styles.row}>
-                          <Text>Attendance %</Text>
-                          <Text>{payable.attendancePercentage}%</Text>
-                        </View>
-                      </Card.Content>
-                    </Card>
-                  ))
+                  report?.monthlyHuffazPayables?.huffazPayables.map(
+                    (payable: any) => (
+                      <Card key={payable.userId} style={styles.payableCard}>
+                        <Card.Content>
+                          <View style={styles.payableHeader}>
+                            <Text style={styles.payableName}>
+                              {payable.fullName}
+                            </Text>
+                            <Text style={styles.payableAmount}>
+                              ₹ {payable.calculatedAmount}
+                            </Text>
+                          </View>
+                          <View style={styles.row}>
+                            <Text>Attendance Days</Text>
+                            <Text>{payable.attendanceDays}</Text>
+                          </View>
+                          <View style={styles.row}>
+                            <Text>Attendance %</Text>
+                            <Text>{payable.attendancePercentage}%</Text>
+                          </View>
+                        </Card.Content>
+                      </Card>
+                    ),
+                  )
                 )}
               </Card.Content>
             </Card>

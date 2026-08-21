@@ -115,7 +115,7 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
               label="Month Name *"
               value={monthName}
               onChangeText={setMonthName}
-              style={styles.field}
+              style={[styles.field, { marginTop: 14 }]}
               mode="outlined"
             />
             <TextInput

@@ -11,7 +11,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/quran-tehfeez-adaptive-foreground-432x432.png",
         "monochromeImage": "./assets/quran-tehfeez-adaptive-foreground-432x432.png"
       },
@@ -22,7 +22,6 @@
     },
     "splash": {
       "image": "./assets/quran-tehfeez-splash-logo-1024x1024.png",
-      "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "extra": {

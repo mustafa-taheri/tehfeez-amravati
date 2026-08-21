@@ -739,7 +739,10 @@ export const getFinanceReport = async (
     //   academicMonth.workingDays,
     // );
 
-    const huffazPayables = calculateMonthlyHuffazPayables(academicMonthId);
+    const monthlyHuffazPayables =
+      await calculateMonthlyHuffazPayables(academicMonthId);
+
+    console.log(monthlyHuffazPayables);
 
     const settlement = await prisma.monthlySettlement.findUnique({
       where: { academicMonthId },
@@ -755,14 +758,14 @@ export const getFinanceReport = async (
         totalDiscountAmount,
         totalWaivedAmount,
         totalCollectedAmount,
-        dailyPool,
+        dailyPool: roundToTwo(dailyPool),
         feeByMarhala,
         attendanceSummary: {
           totalRecords: attendanceSummary.totalRecords,
           totalDays: attendanceSummary.days.size,
           statusCounts: attendanceSummary.statusCounts,
         },
-        huffazPayables,
+        monthlyHuffazPayables: monthlyHuffazPayables,
         settlement,
       },
     });
