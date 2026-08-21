@@ -9,15 +9,15 @@ export default function SplashScreen() {
       <View style={styles.container}>
         <View style={styles.logoContainer}>
           <Image
-            source={require("../../assets/pngegg.png")}
+            source={require("../../assets/quran-tehfeez-splash-logo-1024x1024.png")}
             style={styles.logo}
             resizeMode="contain"
           />
         </View>
-        <Text style={styles.title}>Qism Al Tehfeez Amravati</Text>
+        {/* <Text style={styles.title}>Qism Al Tehfeez Amravati</Text>
         <Text style={styles.subtitle}>
           Attendance, sessions, and student tracking in one place
-        </Text>
+        </Text> */}
       </View>
     </SafeAreaView>
   );
@@ -36,16 +36,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   logoContainer: {
-    width: 180,
-    height: 180,
+    width: 600,
+    height: 600,
     borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 30,
   },
   logo: {
-    width: 240,
-    height: 240,
+    width: 352,
+    height: 352,
   },
   title: {
     fontSize: 24,

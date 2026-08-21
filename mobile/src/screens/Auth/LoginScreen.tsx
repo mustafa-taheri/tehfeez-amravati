@@ -45,7 +45,7 @@ export default function LoginScreen({ navigation }: any) {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Image
-          source={require("../../../assets/pngegg.png")}
+          source={require("../../../assets/quran-tehfeez-splash-logo-1024x1024.png")}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -96,14 +96,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    width: 140,
-    height: 140,
+    width: 200,
+    height: 200,
     alignSelf: "center",
-    marginBottom: 20,
   },
   title: {
     textAlign: "center",
-    marginBottom: 30,
+    marginBottom: 20,
     fontSize: 24,
     fontWeight: "bold",
   },
