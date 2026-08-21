@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { Appbar, Button, Text, HelperText, useTheme } from "react-native-paper";
+import {
+  Appbar,
+  Button,
+  Text,
+  HelperText,
+  useTheme,
+  Portal,
+} from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
@@ -27,6 +34,11 @@ export default function GenerateSettlementScreen({ navigation }: any) {
       console.error("Failed to fetch months", err);
     }
   };
+
+  const academicMonthsOptions = academicMonths.map((m) => ({
+    label: m.name,
+    value: m.id,
+  }));
 
   const handleGenerate = async () => {
     if (!academicMonthId) {
@@ -55,52 +67,45 @@ export default function GenerateSettlementScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Appbar.Header style={styles.appBar}>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Generate Settlement" />
-      </Appbar.Header>
+    <PaperProvider>
+      <Portal.Host>
+        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+          <Appbar.Header style={styles.appBar}>
+            <Appbar.BackAction onPress={() => navigation.goBack()} />
+            <Appbar.Content title="Generate Settlement" />
+          </Appbar.Header>
 
-      <View style={styles.container}>
-        {error && (
-          <HelperText type="error" visible={!!error}>
-            {error}
-          </HelperText>
-        )}
+          <View style={styles.container}>
+            {error && (
+              <HelperText type="error" visible={!!error}>
+                {error}
+              </HelperText>
+            )}
 
-        <Text style={styles.label}>Academic Month *</Text>
-        <View style={styles.pickerContainer}>
-          {/* <Picker
-            selectedValue={academicMonthId}
-            onValueChange={(val) => setAcademicMonthId(val)}
-          >
-            <Picker.Item label="Select Month" value="" />
-            {academicMonths.map((m) => (
-              <Picker.Item key={m.id} label={m.name} value={m.id} />
-            ))}
-          </Picker> */}
-          <PaperProvider>
+            <Text style={styles.label}>Academic Month *</Text>
+
             <Dropdown
-              label="Select Month"
-              options={academicMonths}
+              label={<Text style={{ fontSize: 16 }}>{"Academic Month"}</Text>}
+              options={academicMonthsOptions}
               value={academicMonthId}
-              onSelect={(value) => setAcademicMonthId}
+              onSelect={(value) => setAcademicMonthId(value)}
               mode="outlined"
             />
-          </PaperProvider>
-        </View>
+            {/* </View> */}
 
-        <Button
-          mode="contained"
-          onPress={handleGenerate}
-          loading={loading}
-          disabled={loading}
-          style={styles.generateButton}
-        >
-          Generate
-        </Button>
-      </View>
-    </SafeAreaView>
+            <Button
+              mode="contained"
+              onPress={handleGenerate}
+              loading={loading}
+              disabled={loading}
+              style={styles.generateButton}
+            >
+              Generate
+            </Button>
+          </View>
+        </SafeAreaView>
+      </Portal.Host>
+    </PaperProvider>
   );
 }
 

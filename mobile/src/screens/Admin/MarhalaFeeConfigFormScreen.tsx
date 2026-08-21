@@ -146,17 +146,18 @@ export default function MarhalaFeeConfigFormScreen({ navigation, route }: any) {
                 {error}
               </HelperText>
             )}
-
+            <Text style={styles.label}>Select Academic Period *</Text>
             <Dropdown
-              label="Select Academic Period *"
+              label={<Text style={{ fontSize: 16 }}>{"Academic Period"}</Text>}
               options={academicPeriodsOptions}
               value={academicPeriodId}
               onSelect={setAcademicPeriodId}
               mode="outlined"
             />
+            <Text style={styles.label}>Select Marhala *</Text>
 
             <Dropdown
-              label="Select Marhala *"
+              label={<Text style={{ fontSize: 16 }}>{"Marhala"}</Text>}
               options={marhalasOptions}
               value={marhalaId}
               onSelect={setMarhalaId}

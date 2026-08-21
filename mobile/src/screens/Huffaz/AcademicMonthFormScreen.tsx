@@ -105,11 +105,10 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
           <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.label}>Select Academic Period</Text>
             <Dropdown
-              // label="Select Academic Period *"
+              label={<Text style={{ fontSize: 16 }}>{"Academic Period"}</Text>}
               options={periodsOptions}
               value={selectedPeriodId}
               onSelect={setSelectedPeriodId}
-              // menuContentStyle={styles.field}
               mode="outlined"
             />
             <TextInput

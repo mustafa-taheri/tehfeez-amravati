@@ -8,6 +8,7 @@ import {
   useTheme,
   Avatar,
   Divider,
+  Portal,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
@@ -34,7 +35,10 @@ export default function HuffazPayableListScreen({ navigation }: any) {
     }
   }, [selectedMonth]);
 
-  const academicMonthsOptions = academicMonths.map(m => ({ label: m.name, value: m.id }));
+  const academicMonthsOptions = academicMonths.map((m) => ({
+    label: m.name,
+    value: m.id,
+  }));
 
   const fetchMonths = async () => {
     try {
@@ -42,7 +46,9 @@ export default function HuffazPayableListScreen({ navigation }: any) {
       if (response.data.success) {
         setAcademicMonths(response.data.data);
         if (response.data.data.length > 0) {
-          setSelectedMonth(response.data.data[response.data.data.length - 1].id);
+          setSelectedMonth(
+            response.data.data[response.data.data.length - 1].id,
+          );
         }
       }
     } catch (error) {
@@ -56,6 +62,7 @@ export default function HuffazPayableListScreen({ navigation }: any) {
       const response = await apiClient.get(`/finance/payables`, {
         params: { academicMonthId: selectedMonth },
       });
+
       if (response.data.success) {
         setPayables(response.data.data);
       }
@@ -80,17 +87,16 @@ export default function HuffazPayableListScreen({ navigation }: any) {
           <View style={styles.header}>
             <Avatar.Text
               size={40}
-              label={item.user.fullName.charAt(0)}
+              label={item.fullName.charAt(0)}
               style={{ backgroundColor: colors.primary }}
             />
             <View style={styles.info}>
-              <Text style={styles.huffazName}>{item.user.fullName}</Text>
-              <Text style={styles.subText}>{item.user.mobileNumber}</Text>
+              <Text style={styles.huffazName}>{item.fullName}</Text>
             </View>
           </View>
-          
+
           <Divider style={styles.divider} />
-          
+
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Attendance</Text>
@@ -98,11 +104,13 @@ export default function HuffazPayableListScreen({ navigation }: any) {
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Calculated</Text>
-              <Text style={styles.statValue}>₹{item.calculatedAmount}</Text>
+              <Text style={styles.statValue}>{item.attendancePercentage}%</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Payable</Text>
-              <Text style={[styles.statValue, { color: "#4CAF50" }]}>₹{item.finalPayableAmount}</Text>
+              <Text style={[styles.statValue, { color: "#4CAF50" }]}>
+                ₹{item.calculatedAmount}
+              </Text>
             </View>
           </View>
         </Card.Content>
@@ -111,48 +119,65 @@ export default function HuffazPayableListScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Appbar.Header style={styles.appBar}>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Huffaz Payables" />
-      </Appbar.Header>
+    <PaperProvider>
+      <Portal.Host>
+        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+          <Appbar.Header style={styles.appBar}>
+            <Appbar.BackAction onPress={() => navigation.goBack()} />
+            <Appbar.Content title="Huffaz Payables" />
+          </Appbar.Header>
 
-      <View style={styles.container}>
-        <PaperProvider>
-          <Dropdown
-            label="Select Academic Month"
-            options={academicMonthsOptions}
-            value={selectedMonth}
-            onSelect={setSelectedMonth}
-            mode="outlined"
-          />
-        </PaperProvider>
+          <View style={styles.container}>
+            <Dropdown
+              label={<Text style={{ fontSize: 16 }}>{"Academic Month"}</Text>}
+              options={academicMonthsOptions}
+              value={selectedMonth}
+              onSelect={setSelectedMonth}
+              mode="outlined"
+            />
 
-        {loading ? (
-          <ActivityIndicator size="large" style={styles.loader} />
-        ) : (
-          <FlatList
-            data={payables}
-            keyExtractor={(item, index) => item.userId || index.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={styles.list}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>No payables data found for this month.</Text>
-            }
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={() => onRefresh()}
-                colors={[colors.primary]}
-                progressBackgroundColor={colors.elevation.level2}
-                tintColor={colors.primary}
-              />
-            }
-          />
-        )}
-      </View>
-    </SafeAreaView>
+            {loading ? (
+              <ActivityIndicator size="large" style={styles.loader} />
+            ) : (
+              <>
+                <View style={styles.rowBetween}>
+                  <Text style={styles.amountLabel}>
+                    {`Daily Pool of this Month`}
+                  </Text>
+                  <Text style={styles.amountLabel}>
+                    ₹ {payables?.dailyPool ?? 0}
+                  </Text>
+                </View>
+
+                <FlatList
+                  data={payables?.huffazPayables}
+                  keyExtractor={(item, index) =>
+                    item.userId || index.toString()
+                  }
+                  renderItem={renderItem}
+                  contentContainerStyle={styles.list}
+                  ListEmptyComponent={
+                    <Text style={styles.emptyText}>
+                      No payables data found for this month.
+                    </Text>
+                  }
+                  showsVerticalScrollIndicator={false}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={refreshing}
+                      onRefresh={() => onRefresh()}
+                      colors={[colors.primary]}
+                      progressBackgroundColor={colors.elevation.level2}
+                      tintColor={colors.primary}
+                    />
+                  }
+                />
+              </>
+            )}
+          </View>
+        </SafeAreaView>
+      </Portal.Host>
+    </PaperProvider>
   );
 }
 
@@ -186,4 +211,17 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 11, color: "#888", marginBottom: 2 },
   statValue: { fontSize: 14, fontWeight: "bold" },
   emptyText: { textAlign: "center", marginTop: 30, color: "#888" },
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+    marginTop: 6,
+    padding: 5,
+    alignItems: "center",
+  },
+  amountLabel: {
+    marginTop: 6,
+    color: "#555",
+    fontSize: 15,
+  },
 });

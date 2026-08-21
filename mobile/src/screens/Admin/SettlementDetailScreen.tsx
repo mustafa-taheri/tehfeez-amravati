@@ -31,7 +31,7 @@ export default function SettlementDetailScreen({ navigation, route }: any) {
   const [adjType, setAdjType] = useState("BONUS");
   const adjTypeOptions = [
     { label: "Bonus", value: "BONUS" },
-    { label: "Deduction", value: "DEDUCTION" }
+    { label: "Deduction", value: "DEDUCTION" },
   ];
   const [adjAmount, setAdjAmount] = useState("");
   const [adjReason, setAdjReason] = useState("");
@@ -44,7 +44,9 @@ export default function SettlementDetailScreen({ navigation, route }: any) {
   const fetchDetail = async (isRefreshing = false) => {
     try {
       if (!isRefreshing) setLoading(true);
-      const response = await apiClient.get(`/finance/settlements/${settlementId}`);
+      const response = await apiClient.get(
+        `/finance/settlements/${settlementId}`,
+      );
       if (response.data.success) {
         setSettlement(response.data.data);
       }
@@ -64,7 +66,9 @@ export default function SettlementDetailScreen({ navigation, route }: any) {
   const handleLock = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.post(`/finance/settlements/${settlementId}/lock`);
+      const response = await apiClient.post(
+        `/finance/settlements/${settlementId}/lock`,
+      );
       if (response.data.success) {
         alert("Settlement Locked successfully!");
         fetchDetail();
@@ -88,7 +92,7 @@ export default function SettlementDetailScreen({ navigation, route }: any) {
           adjustmentType: adjType,
           amount: parseFloat(adjAmount),
           reason: adjReason,
-        }
+        },
       );
       if (response.data.success) {
         setModalVisible(false);
@@ -136,127 +140,171 @@ export default function SettlementDetailScreen({ navigation, route }: any) {
   const isLocked = settlement.settlementStatus === "LOCKED";
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Appbar.Header style={styles.appBar}>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Settlement Details" />
-      </Appbar.Header>
+    <PaperProvider>
+      <Portal.Host>
+        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+          <Appbar.Header style={styles.appBar}>
+            <Appbar.BackAction onPress={() => navigation.goBack()} />
+            <Appbar.Content title="Settlement Details" />
+          </Appbar.Header>
 
-      <ScrollView
-        contentContainerStyle={styles.container}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
-        }
-      >
-        <Card style={styles.card}>
-          <Card.Content>
-            <View style={styles.rowBetween}>
-              <Title>{settlement.academicMonth.name}</Title>
-              <Text style={{ fontWeight: 'bold', color: isLocked ? "#4CAF50" : "#2196F3" }}>
-                {settlement.settlementStatus}
-              </Text>
-            </View>
-            <Divider style={styles.divider} />
-            <View style={styles.rowBetween}>
-              <Text>Total Students:</Text>
-              <Text style={styles.bold}>{settlement.totalStudents}</Text>
-            </View>
-            <View style={styles.rowBetween}>
-              <Text>Total Configured Fees:</Text>
-              <Text style={styles.bold}>₹{settlement.totalConfiguredFees}</Text>
-            </View>
-            <View style={styles.rowBetween}>
-              <Text>Total Collected Amount:</Text>
-              <Text style={[styles.bold, { color: "#4CAF50" }]}>₹{settlement.totalCollectedAmount}</Text>
-            </View>
-            <View style={styles.rowBetween}>
-              <Text>Total Payable Pool:</Text>
-              <Text style={[styles.bold, { color: "#F44336" }]}>₹{settlement.totalPayablePool}</Text>
-            </View>
-            
-            {!isLocked && (
-              <Button mode="contained" onPress={handleLock} style={styles.lockButton} icon="lock">
-                Lock Settlement
-              </Button>
-            )}
-          </Card.Content>
-        </Card>
+          <ScrollView
+            contentContainerStyle={styles.container}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[colors.primary]}
+              />
+            }
+          >
+            <Card style={styles.card}>
+              <Card.Content>
+                <View style={styles.rowBetween}>
+                  <Title>{settlement.academicMonth.name}</Title>
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      color: isLocked ? "#4CAF50" : "#2196F3",
+                    }}
+                  >
+                    {settlement.settlementStatus}
+                  </Text>
+                </View>
+                <Divider style={styles.divider} />
+                <View style={styles.rowBetween}>
+                  <Text>Total Students:</Text>
+                  <Text style={styles.bold}>{settlement.totalStudents}</Text>
+                </View>
+                <View style={styles.rowBetween}>
+                  <Text>Total Configured Fees:</Text>
+                  <Text style={styles.bold}>
+                    ₹{settlement.totalConfiguredFees}
+                  </Text>
+                </View>
+                <View style={styles.rowBetween}>
+                  <Text>Total Collected Amount:</Text>
+                  <Text style={[styles.bold, { color: "#4CAF50" }]}>
+                    ₹{settlement.totalCollectedAmount}
+                  </Text>
+                </View>
+                <View style={styles.rowBetween}>
+                  <Text>Total Payable Pool:</Text>
+                  <Text style={[styles.bold, { color: "#F44336" }]}>
+                    ₹{settlement.totalPayablePool}
+                  </Text>
+                </View>
 
-        <Title style={styles.sectionTitle}>Huffaz Details</Title>
-        {settlement.monthlySettlementDetails?.map((detail: any) => (
-          <Card key={detail.id} style={styles.detailCard}>
-            <Card.Content>
-              <Text style={styles.huffazName}>{detail.user?.fullName}</Text>
-              <Text style={styles.subText}>Days: {detail.attendanceDays} ({detail.attendancePercentage}%)</Text>
-              
-              <View style={styles.rowBetween}>
-                <Text>Calculated:</Text>
-                <Text>₹{detail.calculatedAmount}</Text>
-              </View>
-              <View style={styles.rowBetween}>
-                <Text>Bonus:</Text>
-                <Text style={{color: '#4CAF50'}}>+₹{detail.bonusAmount}</Text>
-              </View>
-              <View style={styles.rowBetween}>
-                <Text>Deduction:</Text>
-                <Text style={{color: '#F44336'}}>-₹{detail.deductionAmount}</Text>
-              </View>
-              <Divider style={{ marginVertical: 6 }} />
-              <View style={styles.rowBetween}>
-                <Text style={styles.bold}>Final Payable:</Text>
-                <Text style={[styles.bold, { fontSize: 16 }]}>₹{detail.finalPayableAmount}</Text>
-              </View>
+                {!isLocked && (
+                  <Button
+                    mode="contained"
+                    onPress={handleLock}
+                    style={styles.lockButton}
+                    icon="lock"
+                  >
+                    Lock Settlement
+                  </Button>
+                )}
+              </Card.Content>
+            </Card>
 
-              {!isLocked && (
-                <Button mode="text" onPress={() => openAdjustmentModal(detail.id)} style={styles.adjButton}>
-                  Add Adjustment
+            <Title style={styles.sectionTitle}>Huffaz Details</Title>
+            {settlement.monthlySettlementDetails?.map((detail: any) => (
+              <Card key={detail.id} style={styles.detailCard}>
+                <Card.Content>
+                  <Text style={styles.huffazName}>{detail.user?.fullName}</Text>
+                  <Text style={styles.subText}>
+                    Days: {detail.attendanceDays} ({detail.attendancePercentage}
+                    %)
+                  </Text>
+
+                  <View style={styles.rowBetween}>
+                    <Text>Calculated:</Text>
+                    <Text>₹{detail.calculatedAmount}</Text>
+                  </View>
+                  <View style={styles.rowBetween}>
+                    <Text>Bonus:</Text>
+                    <Text style={{ color: "#4CAF50" }}>
+                      +₹{detail.bonusAmount}
+                    </Text>
+                  </View>
+                  <View style={styles.rowBetween}>
+                    <Text>Deduction:</Text>
+                    <Text style={{ color: "#F44336" }}>
+                      -₹{detail.deductionAmount}
+                    </Text>
+                  </View>
+                  <Divider style={{ marginVertical: 6 }} />
+                  <View style={styles.rowBetween}>
+                    <Text style={styles.bold}>Final Payable:</Text>
+                    <Text style={[styles.bold, { fontSize: 16 }]}>
+                      ₹{detail.finalPayableAmount}
+                    </Text>
+                  </View>
+
+                  {!isLocked && (
+                    <Button
+                      mode="text"
+                      onPress={() => openAdjustmentModal(detail.id)}
+                      style={styles.adjButton}
+                    >
+                      Add Adjustment
+                    </Button>
+                  )}
+                </Card.Content>
+              </Card>
+            ))}
+          </ScrollView>
+
+          <Portal>
+            <Modal
+              visible={modalVisible}
+              onDismiss={() => setModalVisible(false)}
+              contentContainerStyle={styles.modalContainer}
+            >
+              <Title style={{ marginBottom: 10 }}>Add Adjustment</Title>
+
+              <Dropdown
+                label={
+                  <Text style={{ fontSize: 16 }}>{"Adjustment Type"}</Text>
+                }
+                options={adjTypeOptions}
+                value={adjType}
+                onSelect={setAdjType}
+                mode="outlined"
+              />
+              <TextInput
+                label="Amount (₹)"
+                value={adjAmount}
+                onChangeText={setAdjAmount}
+                keyboardType="numeric"
+                mode="outlined"
+                style={{ marginBottom: 12 }}
+              />
+
+              <TextInput
+                label="Reason"
+                value={adjReason}
+                onChangeText={setAdjReason}
+                mode="outlined"
+                style={{ marginBottom: 20 }}
+              />
+
+              <View style={styles.modalActions}>
+                <Button onPress={() => setModalVisible(false)}>Cancel</Button>
+                <Button
+                  mode="contained"
+                  onPress={submitAdjustment}
+                  loading={submittingAdj}
+                >
+                  Submit
                 </Button>
-              )}
-            </Card.Content>
-          </Card>
-        ))}
-      </ScrollView>
-
-      <Portal>
-        <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)} contentContainerStyle={styles.modalContainer}>
-          <Title style={{marginBottom: 10}}>Add Adjustment</Title>
-          
-          <PaperProvider>
-            <Dropdown
-              label="Adjustment Type"
-              options={adjTypeOptions}
-              value={adjType}
-              onSelect={setAdjType}
-              mode="outlined"
-            />
-          </PaperProvider>
-          
-          <TextInput
-            label="Amount (₹)"
-            value={adjAmount}
-            onChangeText={setAdjAmount}
-            keyboardType="numeric"
-            mode="outlined"
-            style={{ marginBottom: 12 }}
-          />
-          
-          <TextInput
-            label="Reason"
-            value={adjReason}
-            onChangeText={setAdjReason}
-            mode="outlined"
-            style={{ marginBottom: 20 }}
-          />
-          
-          <View style={styles.modalActions}>
-            <Button onPress={() => setModalVisible(false)}>Cancel</Button>
-            <Button mode="contained" onPress={submitAdjustment} loading={submittingAdj}>
-              Submit
-            </Button>
-          </View>
-        </Modal>
-      </Portal>
-    </SafeAreaView>
+              </View>
+            </Modal>
+          </Portal>
+        </SafeAreaView>
+      </Portal.Host>
+    </PaperProvider>
   );
 }
 
@@ -267,16 +315,31 @@ const styles = StyleSheet.create({
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   card: { marginBottom: 16, backgroundColor: "#fff", borderRadius: 12 },
   detailCard: { marginBottom: 12, backgroundColor: "#fff" },
-  rowBetween: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6, alignItems: 'center' },
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+    alignItems: "center",
+  },
   bold: { fontWeight: "bold" },
   divider: { marginVertical: 10 },
   lockButton: { marginTop: 16, backgroundColor: "#F44336" },
   sectionTitle: { fontSize: 18, fontWeight: "bold", marginVertical: 10 },
   huffazName: { fontSize: 16, fontWeight: "bold", marginBottom: 2 },
   subText: { fontSize: 12, color: "#666", marginBottom: 8 },
-  adjButton: { alignSelf: 'flex-end', marginTop: -5 },
-  
-  modalContainer: { backgroundColor: 'white', padding: 20, margin: 20, borderRadius: 12 },
-  pickerContainer: { borderWidth: 1, borderColor: "#ccc", borderRadius: 5, marginBottom: 12 },
-  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10 },
+  adjButton: { alignSelf: "flex-end", marginTop: -5 },
+
+  modalContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    margin: 20,
+    borderRadius: 12,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginBottom: 12,
+  },
+  modalActions: { flexDirection: "row", justifyContent: "flex-end", gap: 10 },
 });

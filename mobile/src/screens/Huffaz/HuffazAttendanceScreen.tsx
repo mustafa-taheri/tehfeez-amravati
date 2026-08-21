@@ -99,8 +99,9 @@ const HuffazAttendanceScreen = ({ navigation, route }: any) => {
 
           <View style={styles.container}>
             <View style={{ marginBottom: 20 }}>
+              <Text style={styles.label}>Select Academic Month</Text>
               <Dropdown
-                label="Select Academic Month"
+                label={<Text style={{ fontSize: 16 }}>{"Academic Month"}</Text>}
                 options={academicMonthsOptions}
                 value={selectedAcademicMonth}
                 onSelect={(value) => setSelectedAcademicMonth(value)}
@@ -197,4 +198,5 @@ const styles = StyleSheet.create({
     color: "#888",
     fontSize: 16,
   },
+  label: { fontSize: 14, color: "#666", marginBottom: 6, marginTop: 12 },
 });
