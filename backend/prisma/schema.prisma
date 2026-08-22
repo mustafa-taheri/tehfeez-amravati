@@ -204,7 +204,7 @@ model MarhalaFeeConfiguration {
 
 model Student {
   id                 String        @id @default(uuid()) @db.Uuid
-  itsNumber          Int           @unique @db.SmallInt(9)
+  itsNumber          Int           @unique @db.SmallInt
   firstName          String        @db.VarChar(100)
   lastName           String?       @db.VarChar(100)
   fullName           String        @db.VarChar(200)
@@ -313,7 +313,7 @@ model QuranSession {
   murajaahJuz     Int?        @db.SmallInt
   murajaahMarks   Decimal?    @db.Decimal(5, 2)
   juzHaaliMarks   Decimal?    @db.Decimal(5, 2)
-  jadeedStartAyah String?     @db.Varchar(20)
+  jadeedStartAyah String?     @db.VarChar(20)
   hifzProgress    String?     @db.VarChar(200)
   durationMinutes Int?        @db.SmallInt
   remarks         String?     @db.Text
