@@ -10,6 +10,15 @@ WORKDIR /app
 # Install dependencies first for Docker layer caching
 COPY package.json package-lock.json ./
 
+RUN set -ex \
+  && echo ">>> Node version: $(node -v)" \
+  && echo ">>> NPM version: $(npm -v)" \
+  && if [ -f package-lock.json ]; then \
+       npm ci --verbose; \
+     else \
+       npm install --legacy-peer-deps --no-audit --unsafe-perm --verbose; \
+     fi
+
 RUN npm ci
 
 # Copy Prisma configuration and schema
