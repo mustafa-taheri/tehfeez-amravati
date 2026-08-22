@@ -31,7 +31,7 @@ export const getMarhalaFeeConfigurations = async (
 ): Promise<void> => {
   try {
     const { academicPeriodId } = req.query;
-    
+
     let whereClause = {};
     if (academicPeriodId) {
       whereClause = { academicPeriodId: academicPeriodId as string };
@@ -64,18 +64,26 @@ export const createMarhalaFeeConfiguration = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const { academicPeriodId, marhalaId, monthlyFee, effectiveFrom, effectiveTo, isActive } = req.body;
-    const createdBy = req.user?.id;
+    const {
+      academicPeriodId,
+      marhalaId,
+      monthlyFee,
+      effectiveFrom,
+      effectiveTo,
+      isActive,
+    } = req.body;
+    const createdBy = req.user?.userId;
 
     // Check if configuration already exists for this period and marhala
     const existing = await prisma.marhalaFeeConfiguration.findFirst({
-      where: { academicPeriodId, marhalaId }
+      where: { academicPeriodId, marhalaId },
     });
 
     if (existing) {
       res.status(400).json({
         success: false,
-        message: "Fee configuration already exists for this Marhala in the given Academic Period.",
+        message:
+          "Fee configuration already exists for this Marhala in the given Academic Period.",
       });
       return;
     }
@@ -93,7 +101,7 @@ export const createMarhalaFeeConfiguration = async (
       include: {
         marhala: true,
         academicPeriod: true,
-      }
+      },
     });
 
     res.status(201).json({
@@ -117,21 +125,23 @@ export const updateMarhalaFeeConfiguration = async (
   try {
     const { id } = req.params;
     const { monthlyFee, effectiveFrom, effectiveTo, isActive } = req.body;
-    const updatedBy = req.user?.id;
+    const updatedBy = req.user?.userId;
 
     const updatedConfig = await prisma.marhalaFeeConfiguration.update({
       where: { id },
       data: {
         ...(monthlyFee !== undefined && { monthlyFee }),
         ...(effectiveFrom && { effectiveFrom: new Date(effectiveFrom) }),
-        ...(effectiveTo !== undefined && { effectiveTo: effectiveTo ? new Date(effectiveTo) : null }),
+        ...(effectiveTo !== undefined && {
+          effectiveTo: effectiveTo ? new Date(effectiveTo) : null,
+        }),
         ...(isActive !== undefined && { isActive }),
         updatedBy,
       },
       include: {
         marhala: true,
         academicPeriod: true,
-      }
+      },
     });
 
     res.status(200).json({
@@ -154,7 +164,7 @@ export const deleteMarhalaFeeConfiguration = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const updatedBy = req.user?.id;
+    const updatedBy = req.user?.userId;
 
     await prisma.marhalaFeeConfiguration.update({
       where: { id },
