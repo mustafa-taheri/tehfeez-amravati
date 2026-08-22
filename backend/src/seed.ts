@@ -92,12 +92,12 @@ async function main() {
   });
   if (marhalaUla) {
     const existingStudent = await prisma.student.findUnique({
-      where: { itsNumber: "ITS001" },
+      where: { itsNumber: 3030011 },
     });
     if (!existingStudent) {
       await prisma.student.create({
         data: {
-          itsNumber: "ITS001",
+          itsNumber: 3030011,
           firstName: "Ammar",
           lastName: "Hussain",
           fullName: "Ammar Hussain",
