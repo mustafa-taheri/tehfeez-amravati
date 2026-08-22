@@ -7,33 +7,26 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies first for Docker layer caching
+# Copy dependency files first for Docker caching
 COPY package.json package-lock.json ./
 
-RUN set -ex \
-  && echo ">>> Node version: $(node -v)" \
-  && echo ">>> NPM version: $(npm -v)" \
-  && if [ -f package-lock.json ]; then \
-       npm ci --verbose; \
-     else \
-       npm install --legacy-peer-deps --no-audit --unsafe-perm --verbose; \
-     fi
-
+# Install all dependencies
 RUN npm ci
 
-# Copy Prisma configuration and schema
+# Prisma configuration and schema
 COPY prisma.config.ts ./
 COPY prisma ./prisma
 
-# Copy TypeScript configuration
+# TypeScript configuration
 COPY tsconfig.json ./
 
-# Copy application source
+# Application source
 COPY src ./src
 
 # Build application
-# Your package.json already runs:
-# prisma generate && tsc --outDir dist
+# Runs:
+# prisma generate
+# tsc --outDir dist
 RUN npm run build
 
 
@@ -47,22 +40,26 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Install only production dependencies
+# Install production dependencies
+# Prisma is intentionally in dependencies because
+# Render pre-deploy runs prisma migrate deploy.
 COPY package.json package-lock.json ./
 
 RUN npm ci --omit=dev
 
-# Copy generated Prisma client and compiled application
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+# Copy compiled application
 COPY --from=builder /app/dist ./dist
 
-# Prisma config + schema are needed for migration commands
+# Copy Prisma generated client
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+# Prisma configuration and schema
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/prisma ./prisma
 
-# Render uses PORT=10000 by default, but the application
-# should read process.env.PORT at runtime.
+# Render Web Service port
 EXPOSE 3000
 
-CMD ["node", "dist/index.js"]
+# Application entry point
+CMD ["sh","-c", "npx prisma migrate deploy && node dist/index.js"]
