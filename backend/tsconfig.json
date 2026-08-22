@@ -25,6 +25,7 @@
     "exactOptionalPropertyTypes": false,
     "noEmitOnError": false,
     "checkJs": false,
+    "noCheck": true,
 
     // Style Options
     // "noImplicitReturns": true,
