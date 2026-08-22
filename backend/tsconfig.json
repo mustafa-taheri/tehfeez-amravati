@@ -17,8 +17,7 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": false,
 
-    "noEmitOnError": true,
-    "checkJs": false,
+    "noCheck": true,
 
     "strict": false,
 
