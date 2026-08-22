@@ -3,21 +3,18 @@
 # Production Dockerfile
 # ==========================================
 
-FROM node:22-alpine AS build
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies first for better Docker caching
+# Install dependencies first for Docker layer caching
 COPY package.json package-lock.json ./
 
 RUN npm ci
 
 # Copy Prisma configuration and schema
-COPY prisma ./prisma
 COPY prisma.config.ts ./
-
-# Generate Prisma Client
-RUN npx prisma generate
+COPY prisma ./prisma
 
 # Copy TypeScript configuration
 COPY tsconfig.json ./
@@ -25,11 +22,10 @@ COPY tsconfig.json ./
 # Copy application source
 COPY src ./src
 
-# Build TypeScript application
+# Build application
+# Your package.json already runs:
+# prisma generate && tsc --outDir dist
 RUN npm run build
-
-# Remove development dependencies
-RUN npm prune --omit=dev
 
 
 # ==========================================
@@ -42,22 +38,22 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Render provides PORT at runtime.
-# 10000 is Render's default Web Service port.
-ENV PORT=3000
+# Install only production dependencies
+COPY package.json package-lock.json ./
 
-# Copy production dependencies
-COPY --from=build /app/node_modules ./node_modules
+RUN npm ci --omit=dev
 
-# Copy compiled application
-COPY --from=build /app/dist ./dist
+# Copy generated Prisma client and compiled application
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/dist ./dist
 
-# Copy Prisma schema/config if needed by runtime
-COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/prisma.config.ts ./prisma.config.ts
+# Prisma config + schema are needed for migration commands
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+COPY --from=builder /app/prisma ./prisma
 
-# Application listens on Render's default port
+# Render uses PORT=10000 by default, but the application
+# should read process.env.PORT at runtime.
 EXPOSE 3000
 
-# Start compiled application
-CMD ["node", "dist/index.ts"]
+CMD ["node", "dist/index.js"]

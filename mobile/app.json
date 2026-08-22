@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Qism Al-Tehfeez Amravati",
+    "slug": "tehfeez-amravati",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/quran-tehfeez-app-logo-1024x1024.png",
@@ -25,7 +25,11 @@
       "backgroundColor": "#ffffff"
     },
     "extra": {
-      "API_URL": "http://192.168.1.115:5000/api/v1"
-    }
+      "API_URL": "http://192.168.1.115:5000/api/v1",
+      "eas": {
+        "projectId": "0373a26a-aeca-4721-8f5a-af5bddb53a62"
+      }
+    },
+    "owner": "fatemi-creators-team"
   }
 }
