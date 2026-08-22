@@ -3,6 +3,16 @@
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
+  "supportedArchitectures": {
+    "os": [
+      "darwin",
+      "linux"
+    ],
+    "cpu": [
+      "x64",
+      "arm64"
+    ]
+  },
   "scripts": {
     "build": "prisma generate && tsc --outDir dist",
     "start": "node dist/index.js",
@@ -42,7 +52,6 @@
     "prisma": "^7.9.1",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.23.12",
-    "typescript": "^7.0.2",
-    "@typescript/typescript-linux-x64" : "^7.0.2"
+    "typescript": "^7.0.2"
   }
 }
