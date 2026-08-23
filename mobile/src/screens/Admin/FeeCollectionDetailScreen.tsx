@@ -97,7 +97,7 @@ export default function FeeCollectionDetailScreen({ navigation, route }: any) {
   if (!collection) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <Appbar.Header style={styles.appBar}>
+        <Appbar.Header mode="small" style={styles.appBar}>
           <Appbar.BackAction onPress={() => navigation.goBack()} />
           <Appbar.Content title="Fee Collection" />
         </Appbar.Header>
@@ -112,7 +112,7 @@ export default function FeeCollectionDetailScreen({ navigation, route }: any) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Appbar.Header style={styles.appBar}>
+      <Appbar.Header mode="small" style={styles.appBar}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Fee Details" />
       </Appbar.Header>

@@ -126,7 +126,7 @@ export default function SettlementDetailScreen({ navigation, route }: any) {
   if (!settlement) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <Appbar.Header style={styles.appBar}>
+        <Appbar.Header mode="small" style={styles.appBar}>
           <Appbar.BackAction onPress={() => navigation.goBack()} />
           <Appbar.Content title="Settlement Details" />
         </Appbar.Header>
@@ -143,7 +143,7 @@ export default function SettlementDetailScreen({ navigation, route }: any) {
     <PaperProvider>
       <Portal.Host>
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
-          <Appbar.Header style={styles.appBar}>
+          <Appbar.Header mode="small" style={styles.appBar}>
             <Appbar.BackAction onPress={() => navigation.goBack()} />
             <Appbar.Content title="Settlement Details" />
           </Appbar.Header>

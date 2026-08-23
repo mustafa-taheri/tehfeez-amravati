@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Provider as PaperProvider } from "react-native-paper";
+import { MD3LightTheme, Provider as PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { AuthProvider } from "./src/context/AuthContext";
 import SplashScreen from "./src/components/SplashScreen";
+
+// Explicitly lock the configuration to Light Mode
+const forcedLightTheme = {
+  ...MD3LightTheme,
+  dark: false,
+  colors: {
+    ...MD3LightTheme.colors,
+  },
+};
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
@@ -19,7 +28,10 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <PaperProvider settings={{ rippleEffectEnabled: true }}>
+      <PaperProvider
+        theme={forcedLightTheme}
+        settings={{ rippleEffectEnabled: true }}
+      >
         <AuthProvider>
           <AppNavigator />
         </AuthProvider>

@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { View, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from "react-native";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  RefreshControl,
+} from "react-native";
 import {
   Appbar,
   Card,
@@ -7,7 +13,7 @@ import {
   ActivityIndicator,
   Button,
   useTheme,
-  IconButton
+  IconButton,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
@@ -47,7 +53,9 @@ export default function MarhalaFeeConfigListScreen({ navigation }: any) {
 
   const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity
-      onPress={() => navigation.navigate("MarhalaFeeConfigForm", { config: item })}
+      onPress={() =>
+        navigation.navigate("MarhalaFeeConfigForm", { config: item })
+      }
     >
       <Card style={styles.card}>
         <Card.Content style={styles.cardContent}>
@@ -56,16 +64,30 @@ export default function MarhalaFeeConfigListScreen({ navigation }: any) {
           </View>
           <View style={styles.info}>
             <Text style={styles.marhalaName}>{item.marhala?.name}</Text>
-            <Text style={styles.subText}>Academic Period: {item.academicPeriod?.name}</Text>
             <Text style={styles.subText}>
-              Effective: {new Date(item.effectiveFrom).toLocaleDateString()} 
-              {item.effectiveTo ? ` - ${new Date(item.effectiveTo).toLocaleDateString()}` : " (Ongoing)"}
+              Academic Period: {item.academicPeriod?.name}
+            </Text>
+            <Text style={styles.subText}>
+              Effective: {new Date(item.effectiveFrom).toLocaleDateString()}
+              {item.effectiveTo
+                ? ` - ${new Date(item.effectiveTo).toLocaleDateString()}`
+                : " (Ongoing)"}
             </Text>
           </View>
           <View style={styles.rightInfo}>
             <Text style={styles.feeAmount}>₹{item.monthlyFee}</Text>
-            <View style={[styles.statusBadge, { backgroundColor: item.isActive ? "#E8F5E9" : "#FFEBEE" }]}>
-              <Text style={[styles.statusText, { color: item.isActive ? "#2E7D32" : "#C62828" }]}>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: item.isActive ? "#E8F5E9" : "#FFEBEE" },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.statusText,
+                  { color: item.isActive ? "#2E7D32" : "#C62828" },
+                ]}
+              >
                 {item.isActive ? "Active" : "Inactive"}
               </Text>
             </View>
@@ -77,15 +99,17 @@ export default function MarhalaFeeConfigListScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Appbar.Header style={styles.appBar}>
+      <Appbar.Header mode="small" style={styles.appBar}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Marhala Fee Configurations" />
       </Appbar.Header>
-      
+
       <View style={styles.container}>
         <Button
           mode="contained"
-          onPress={() => navigation.navigate("MarhalaFeeConfigForm", { config: null })}
+          onPress={() =>
+            navigation.navigate("MarhalaFeeConfigForm", { config: null })
+          }
           style={styles.addButton}
           icon="plus"
         >
@@ -146,7 +170,12 @@ const styles = StyleSheet.create({
   marhalaName: { fontSize: 16, fontWeight: "bold", marginBottom: 4 },
   subText: { fontSize: 12, color: "#666", marginBottom: 2 },
   rightInfo: { alignItems: "flex-end" },
-  feeAmount: { fontSize: 18, fontWeight: "bold", color: "#2E7D32", marginBottom: 4 },
+  feeAmount: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2E7D32",
+    marginBottom: 4,
+  },
   statusBadge: {
     borderRadius: 12,
     paddingHorizontal: 8,

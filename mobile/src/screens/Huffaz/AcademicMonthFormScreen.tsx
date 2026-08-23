@@ -98,7 +98,7 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
     <PaperProvider>
       <Portal.Host>
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
-          <Appbar.Header style={styles.appBar}>
+          <Appbar.Header mode="small" style={styles.appBar}>
             <Appbar.BackAction onPress={() => navigation.goBack()} />
             <Appbar.Content title={"Add Academic Month"} />
           </Appbar.Header>

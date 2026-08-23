@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { View, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from "react-native";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  RefreshControl,
+} from "react-native";
 import {
   Appbar,
   Card,
@@ -43,23 +49,34 @@ export default function SettlementListScreen({ navigation }: any) {
 
   const renderItem = ({ item }: { item: any }) => {
     const isLocked = item.settlementStatus === "LOCKED";
-    const statusColor = isLocked ? "#4CAF50" : item.settlementStatus === "GENERATED" ? "#2196F3" : "#FF9800";
+    const statusColor = isLocked
+      ? "#4CAF50"
+      : item.settlementStatus === "GENERATED"
+        ? "#2196F3"
+        : "#FF9800";
 
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate("SettlementDetail", { settlementId: item.id })}
+        onPress={() =>
+          navigation.navigate("SettlementDetail", { settlementId: item.id })
+        }
       >
         <Card style={styles.card}>
           <Card.Content>
             <View style={styles.headerRow}>
               <Text style={styles.monthName}>{item.academicMonth?.name}</Text>
-              <View style={[styles.statusBadge, { backgroundColor: statusColor + "20" }]}>
+              <View
+                style={[
+                  styles.statusBadge,
+                  { backgroundColor: statusColor + "20" },
+                ]}
+              >
                 <Text style={[styles.statusText, { color: statusColor }]}>
                   {item.settlementStatus}
                 </Text>
               </View>
             </View>
-            
+
             <View style={styles.row}>
               <View style={styles.statBox}>
                 <Text style={styles.statLabel}>Students</Text>
@@ -67,11 +84,15 @@ export default function SettlementListScreen({ navigation }: any) {
               </View>
               <View style={styles.statBox}>
                 <Text style={styles.statLabel}>Collected</Text>
-                <Text style={[styles.statValue, { color: "#4CAF50" }]}>₹{item.totalCollectedAmount}</Text>
+                <Text style={[styles.statValue, { color: "#4CAF50" }]}>
+                  ₹{item.totalCollectedAmount}
+                </Text>
               </View>
               <View style={styles.statBox}>
                 <Text style={styles.statLabel}>Payable Pool</Text>
-                <Text style={[styles.statValue, { color: "#F44336" }]}>₹{item.totalPayablePool}</Text>
+                <Text style={[styles.statValue, { color: "#F44336" }]}>
+                  ₹{item.totalPayablePool}
+                </Text>
               </View>
             </View>
           </Card.Content>
@@ -82,7 +103,7 @@ export default function SettlementListScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Appbar.Header style={styles.appBar}>
+      <Appbar.Header mode="small" style={styles.appBar}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Monthly Settlements" />
       </Appbar.Header>
@@ -106,7 +127,9 @@ export default function SettlementListScreen({ navigation }: any) {
             renderItem={renderItem}
             contentContainerStyle={styles.list}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>No settlements generated yet.</Text>
+              <Text style={styles.emptyText}>
+                No settlements generated yet.
+              </Text>
             }
             showsVerticalScrollIndicator={false}
             refreshControl={
