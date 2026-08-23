@@ -86,7 +86,7 @@ export default function StudentFormScreen({ navigation, route }: any) {
     setLoading(true);
     try {
       const payload = {
-        itsNumber,
+        itsNumber: Number(itsNumber),
         firstName,
         lastName,
         fatherName,

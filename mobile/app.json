@@ -15,7 +15,8 @@
         "foregroundImage": "./assets/quran-tehfeez-adaptive-foreground-432x432.png",
         "monochromeImage": "./assets/quran-tehfeez-adaptive-foreground-432x432.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.fatemicreatorsteam.tehfeezamravati"
     },
     "web": {
       "favicon": "./assets/quran-tehfeez-favicon-48x48.png"

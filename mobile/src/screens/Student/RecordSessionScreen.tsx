@@ -90,9 +90,7 @@ export default function RecordSessionScreen({ route, navigation }: any) {
         murajaahJuz: murajaahJuz ? parseInt(murajaahJuz, 10) : undefined,
         murajaahMarks: murajaahMarks ? parseInt(murajaahMarks, 10) : undefined,
         juzHaaliMarks: juzHaaliMarks ? parseInt(juzHaaliMarks, 10) : undefined,
-        jadeedStartAyah: jadeedStartAyah
-          ? parseInt(jadeedStartAyah, 10)
-          : undefined,
+        jadeedStartAyah: jadeedStartAyah,
         // jadeedEndAyah: jadeedEndAyah ? parseInt(jadeedEndAyah, 10) : undefined,
         // tasmeeMarks: tasmeeMarks ? parseInt(tasmeeMarks, 10) : undefined,
         remarks,
@@ -224,7 +222,6 @@ export default function RecordSessionScreen({ route, navigation }: any) {
           label="Jadeed Starting Ayah (e.g. 1:202)"
           value={jadeedStartAyah}
           onChangeText={setJadeedStartAyah}
-          keyboardType="numeric"
           mode="outlined"
           style={styles.input}
         />

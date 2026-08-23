@@ -27,7 +27,6 @@ export default function LoginScreen({ navigation }: any) {
         username,
         password,
       });
-      console.log("Login response:", response.data);
 
       if (response.data.success) {
         const { user, tokens } = response.data.data;

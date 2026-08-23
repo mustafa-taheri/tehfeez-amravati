@@ -17,6 +17,7 @@ import {
   Button,
   IconButton,
   useTheme,
+  FAB,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
@@ -102,12 +103,6 @@ export default function StudentListScreen({ navigation }: any) {
       <Appbar.Header style={styles.appBar}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Students" />
-        <IconButton
-          icon="plus"
-          mode="contained"
-          onPress={() => navigation.navigate("StudentForm", { student: null })}
-          size={20}
-        />
       </Appbar.Header>
 
       <View style={styles.container}>
@@ -142,6 +137,12 @@ export default function StudentListScreen({ navigation }: any) {
             }
           />
         )}
+        <FAB
+          icon="plus"
+          style={[styles.fab, { backgroundColor: colors.primary }]}
+          color="#fff"
+          onPress={() => navigation.navigate("StudentForm", { student: null })}
+        />
       </View>
     </SafeAreaView>
   );
@@ -158,8 +159,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  addButton: {
-    marginRight: 10,
+  fab: {
+    position: "absolute",
+    margin: 16,
+    right: 0,
+    bottom: 0,
   },
   container: {
     flex: 1,
