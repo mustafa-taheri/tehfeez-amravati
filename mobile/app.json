@@ -31,12 +31,14 @@
     },
     "owner": "fatemi-creators-team",
     "plugins": [
-      "expo-splash-screen",
-      {
-        "image": "./assets/transparent.png",
-        "backgroundColor": "#ffffff",
-        "resizeMode": "contain"
-      }
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/transparent.png",
+          "backgroundColor": "#ffffff",
+          "resizeMode": "contain"
+        }
+      ]
     ]
   }
 }
