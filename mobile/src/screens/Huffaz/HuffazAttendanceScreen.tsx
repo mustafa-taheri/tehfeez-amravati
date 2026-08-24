@@ -9,7 +9,6 @@ import {
   Text,
 } from "react-native-paper";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Dropdown } from "react-native-paper-dropdown";
 import { Provider as PaperProvider } from "react-native-paper";
 import { AuthContext } from "../../context/AuthContext";
 import { forcedLightTheme } from "../../../App";
@@ -101,9 +100,8 @@ const HuffazAttendanceScreen = ({ navigation, route }: any) => {
 
           <View style={styles.container}>
             <View style={{ marginBottom: 20 }}>
-              <Text style={styles.label}>Select Academic Month</Text>
               <DropdownSelect
-                label={"Academic Month"}
+                label={"Select Academic Month"}
                 options={academicMonthsOptions}
                 selectedValue={selectedAcademicMonth}
                 onValueChange={(value) => setSelectedAcademicMonth(value)}

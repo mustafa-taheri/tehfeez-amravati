@@ -130,26 +130,22 @@ export default function FeeCollectionFormScreen({ navigation }: any) {
               </HelperText>
             )}
 
-            <Text style={styles.label}>Select Student *</Text>
-
             <DropdownSelect
-              label={"Student"}
+              label={"Select Student *"}
               options={studentsOptions}
               selectedValue={studentId}
               onValueChange={(value) => setStudentId(value)}
             />
 
-            <Text style={styles.label}>Select Academic Month *</Text>
             <DropdownSelect
-              label={"Academic Month"}
+              label={"Select Academic Month *"}
               options={academicMonthsOptions}
               selectedValue={academicMonthId}
               onValueChange={(value) => setAcademicMonthId(value)}
             />
 
-            <Text style={styles.label}>Select Fee Configuration *</Text>
             <DropdownSelect
-              label={"Fee Configuration"}
+              label={"Select Fee Configuration *"}
               options={feeConfigsOptions}
               selectedValue={marhalaFeeConfigurationId}
               onValueChange={(value) => handleConfigSelect(value)}

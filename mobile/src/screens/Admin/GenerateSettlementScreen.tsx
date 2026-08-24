@@ -83,10 +83,8 @@ export default function GenerateSettlementScreen({ navigation }: any) {
               </HelperText>
             )}
 
-            <Text style={styles.label}>Academic Month *</Text>
-
             <DropdownSelect
-              label={"Academic Month"}
+              label={"Select Academic Month *"}
               options={academicMonthsOptions}
               selectedValue={academicMonthId}
               onValueChange={(value) => setAcademicMonthId(value)}

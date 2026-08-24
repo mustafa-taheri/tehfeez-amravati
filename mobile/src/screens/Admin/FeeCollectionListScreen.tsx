@@ -148,7 +148,7 @@ export default function FeeCollectionListScreen({ navigation }: any) {
 
           <View style={styles.container}>
             <DropdownSelect
-              label={"Academic Month"}
+              label={"Select Academic Month"}
               options={academicMonthsOptions}
               selectedValue={selectedMonth}
               onValueChange={setSelectedMonth}

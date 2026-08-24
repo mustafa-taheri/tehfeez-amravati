@@ -263,8 +263,6 @@ export default function SettlementDetailScreen({ navigation, route }: any) {
               onDismiss={() => setModalVisible(false)}
               contentContainerStyle={styles.modalContainer}
             >
-              <Title style={{ marginBottom: 10 }}>Add Adjustment</Title>
-
               <DropdownSelect
                 label={"Adjustment Type"}
                 options={adjTypeOptions}

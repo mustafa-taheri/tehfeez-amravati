@@ -103,9 +103,8 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
             <Appbar.Content title={"Add Academic Month"} />
           </Appbar.Header>
           <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.label}>Select Academic Period</Text>
             <DropdownSelect
-              label={"Academic Period"}
+              label={"Select Academic Period"}
               options={periodsOptions}
               selectedValue={selectedPeriodId}
               onValueChange={(value) => setSelectedPeriodId(value)}
