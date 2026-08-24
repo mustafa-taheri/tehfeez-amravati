@@ -23,16 +23,20 @@
     "web": {
       "favicon": "./assets/quran-tehfeez-favicon-48x48.png"
     },
-    "splash": {
-      "image": "./assets/transparent.png",
-      "backgroundColor": "#ffffff"
-    },
     "extra": {
       "API_URL": "https://tehfeez-amravati.onrender.com/api/v1",
       "eas": {
         "projectId": "0373a26a-aeca-4721-8f5a-af5bddb53a62"
       }
     },
-    "owner": "fatemi-creators-team"
+    "owner": "fatemi-creators-team",
+    "plugins": [
+      "expo-splash-screen",
+      {
+        "image": "./assets/transparent.png",
+        "backgroundColor": "#ffffff",
+        "resizeMode": "contain"
+      }
+    ]
   }
 }

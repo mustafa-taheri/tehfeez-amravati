@@ -12,9 +12,9 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
-import { Dropdown } from "react-native-paper-dropdown";
 import apiClient from "../../api/client";
 import { forcedLightTheme } from "../../../App";
+import { DropdownSelect } from "react-native-input-select";
 
 export default function FeeCollectionFormScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
@@ -132,32 +132,27 @@ export default function FeeCollectionFormScreen({ navigation }: any) {
 
             <Text style={styles.label}>Select Student *</Text>
 
-            <Dropdown
-              label={<Text style={{ fontSize: 16 }}>{"Student"}</Text>}
+            <DropdownSelect
+              label={"Student"}
               options={studentsOptions}
-              value={studentId}
-              onSelect={setStudentId}
-              mode="outlined"
+              selectedValue={studentId}
+              onValueChange={(value) => setStudentId(value)}
             />
 
             <Text style={styles.label}>Select Academic Month *</Text>
-            <Dropdown
-              label={<Text style={{ fontSize: 16 }}>{"Academic Month"}</Text>}
+            <DropdownSelect
+              label={"Academic Month"}
               options={academicMonthsOptions}
-              value={academicMonthId}
-              onSelect={setAcademicMonthId}
-              mode="outlined"
+              selectedValue={academicMonthId}
+              onValueChange={(value) => setAcademicMonthId(value)}
             />
 
             <Text style={styles.label}>Select Fee Configuration *</Text>
-            <Dropdown
-              label={
-                <Text style={{ fontSize: 16 }}>{"Fee Configuration"}</Text>
-              }
+            <DropdownSelect
+              label={"Fee Configuration"}
               options={feeConfigsOptions}
-              value={marhalaFeeConfigurationId}
-              onSelect={handleConfigSelect}
-              mode="outlined"
+              selectedValue={marhalaFeeConfigurationId}
+              onValueChange={(value) => handleConfigSelect(value)}
             />
 
             <TextInput

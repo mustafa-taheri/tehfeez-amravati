@@ -15,9 +15,9 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
-import { Dropdown } from "react-native-paper-dropdown";
 import apiClient from "../../api/client";
 import { forcedLightTheme } from "../../../App";
+import DropdownSelect from "react-native-input-select";
 
 export default function SettlementDetailScreen({ navigation, route }: any) {
   const { settlementId } = route.params;
@@ -265,14 +265,11 @@ export default function SettlementDetailScreen({ navigation, route }: any) {
             >
               <Title style={{ marginBottom: 10 }}>Add Adjustment</Title>
 
-              <Dropdown
-                label={
-                  <Text style={{ fontSize: 16 }}>{"Adjustment Type"}</Text>
-                }
+              <DropdownSelect
+                label={"Adjustment Type"}
                 options={adjTypeOptions}
-                value={adjType}
-                onSelect={setAdjType}
-                mode="outlined"
+                selectedValue={adjType}
+                onValueChange={(value) => setAdjType()}
               />
               <TextInput
                 label="Amount (₹)"

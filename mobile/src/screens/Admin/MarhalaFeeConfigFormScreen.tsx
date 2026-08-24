@@ -12,11 +12,11 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
-import { Dropdown } from "react-native-paper-dropdown";
 import { validateDDMMYYYY } from "../../utils/dateValidation";
 import { Alert } from "react-native";
 import apiClient from "../../api/client";
 import { forcedLightTheme } from "../../../App";
+import DropdownSelect from "react-native-input-select";
 
 export default function MarhalaFeeConfigFormScreen({ navigation, route }: any) {
   const { config } = route.params || {};
@@ -148,22 +148,19 @@ export default function MarhalaFeeConfigFormScreen({ navigation, route }: any) {
               </HelperText>
             )}
             <Text style={styles.label}>Select Academic Period *</Text>
-            <Dropdown
-              label={<Text style={{ fontSize: 16 }}>{"Academic Period"}</Text>}
+            <DropdownSelect
+              label={"Academic Period"}
               options={academicPeriodsOptions}
-              value={academicPeriodId}
-              onSelect={setAcademicPeriodId}
-              mode="outlined"
+              selectedValue={academicPeriodId}
+              onValueChange={(value) => setAcademicPeriodId(value)}
             />
             <Text style={styles.label}>Select Marhala *</Text>
 
-            <Dropdown
-              label={<Text style={{ fontSize: 16 }}>{"Marhala"}</Text>}
+            <DropdownSelect
+              label={"Marhala"}
               options={marhalasOptions}
-              value={marhalaId}
-              onSelect={setMarhalaId}
-              mode="outlined"
-              // menuContentStyle={<View style={{ marginBottom: 14 }}></View>}
+              selectedValue={marhalaId}
+              onValueChange={(value) => setMarhalaId(value)}
             />
 
             <TextInput

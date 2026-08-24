@@ -12,9 +12,9 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
-import { Dropdown } from "react-native-paper-dropdown";
 import apiClient from "../../api/client";
 import { forcedLightTheme } from "../../../App";
+import DropdownSelect from "react-native-input-select";
 
 export default function HuffazPayableListScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
@@ -129,12 +129,11 @@ export default function HuffazPayableListScreen({ navigation }: any) {
           </Appbar.Header>
 
           <View style={styles.container}>
-            <Dropdown
-              label={<Text style={{ fontSize: 16 }}>{"Academic Month"}</Text>}
+            <DropdownSelect
+              label={"Academic Month"}
               options={academicMonthsOptions}
-              value={selectedMonth}
-              onSelect={setSelectedMonth}
-              mode="outlined"
+              selectedValue={selectedMonth}
+              onValueChange={(value) => setSelectedMonth(value)}
             />
 
             {loading ? (

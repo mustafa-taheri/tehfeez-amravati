@@ -10,9 +10,9 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
-import { Dropdown } from "react-native-paper-dropdown";
 import apiClient from "../../api/client";
 import { forcedLightTheme } from "../../../App";
+import DropdownSelect from "react-native-input-select";
 
 export default function GenerateSettlementScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
@@ -85,12 +85,11 @@ export default function GenerateSettlementScreen({ navigation }: any) {
 
             <Text style={styles.label}>Academic Month *</Text>
 
-            <Dropdown
-              label={<Text style={{ fontSize: 16 }}>{"Academic Month"}</Text>}
+            <DropdownSelect
+              label={"Academic Month"}
               options={academicMonthsOptions}
-              value={academicMonthId}
-              onSelect={(value) => setAcademicMonthId(value)}
-              mode="outlined"
+              selectedValue={academicMonthId}
+              onValueChange={(value) => setAcademicMonthId(value)}
             />
             {/* </View> */}
 

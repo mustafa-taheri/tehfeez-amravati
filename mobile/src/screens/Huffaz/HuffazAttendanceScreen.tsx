@@ -13,6 +13,7 @@ import { Dropdown } from "react-native-paper-dropdown";
 import { Provider as PaperProvider } from "react-native-paper";
 import { AuthContext } from "../../context/AuthContext";
 import { forcedLightTheme } from "../../../App";
+import DropdownSelect from "react-native-input-select";
 
 const HuffazAttendanceScreen = ({ navigation, route }: any) => {
   const { user } = useContext(AuthContext);
@@ -101,17 +102,14 @@ const HuffazAttendanceScreen = ({ navigation, route }: any) => {
           <View style={styles.container}>
             <View style={{ marginBottom: 20 }}>
               <Text style={styles.label}>Select Academic Month</Text>
-              <Dropdown
-                label={<Text style={{ fontSize: 16 }}>{"Academic Month"}</Text>}
+              <DropdownSelect
+                label={"Academic Month"}
                 options={academicMonthsOptions}
-                value={selectedAcademicMonth}
-                onSelect={(value) => setSelectedAcademicMonth(value)}
-                menuContentStyle={styles.field}
-                mode="outlined"
+                selectedValue={selectedAcademicMonth}
+                onValueChange={(value) => setSelectedAcademicMonth(value)}
               />
             </View>
-            {/* </View>
-      <View style={styles.container}> */}
+
             {loading ? (
               <ActivityIndicator size="large" style={styles.loader} />
             ) : (

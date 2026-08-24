@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Appbar, Button, Portal, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Alert, ScrollView, StyleSheet } from "react-native";
-import { Dropdown } from "react-native-paper-dropdown";
 import { Provider as PaperProvider } from "react-native-paper";
 import apiClient from "../../api/client";
 import { validateDDMMYYYY } from "../../utils/dateValidation";
+import DropdownSelect from "react-native-input-select";
 
 const AcademicMonthFormScreen = ({ navigation, route }: any) => {
   const [monthName, setMonthName] = useState("");
@@ -104,12 +104,11 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
           </Appbar.Header>
           <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.label}>Select Academic Period</Text>
-            <Dropdown
-              label={<Text style={{ fontSize: 16 }}>{"Academic Period"}</Text>}
+            <DropdownSelect
+              label={"Academic Period"}
               options={periodsOptions}
-              value={selectedPeriodId}
-              onSelect={setSelectedPeriodId}
-              mode="outlined"
+              selectedValue={selectedPeriodId}
+              onValueChange={(value) => setSelectedPeriodId(value)}
             />
             <TextInput
               label="Month Name *"
