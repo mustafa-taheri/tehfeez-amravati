@@ -6,6 +6,7 @@ import { Provider as PaperProvider } from "react-native-paper";
 import apiClient from "../../api/client";
 import { validateDDMMYYYY } from "../../utils/dateValidation";
 import DropdownSelect from "react-native-input-select";
+import { forcedLightTheme } from "../../../App";
 
 const AcademicMonthFormScreen = ({ navigation, route }: any) => {
   const [monthName, setMonthName] = useState("");
@@ -95,10 +96,14 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <PaperProvider>
+    <PaperProvider theme={forcedLightTheme}>
       <Portal.Host>
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
-          <Appbar.Header mode="small" style={styles.appBar}>
+          <Appbar.Header
+            mode="small"
+            statusBarHeight={0}
+            style={[styles.appBar, { height: 60 }]}
+          >
             <Appbar.BackAction onPress={() => navigation.goBack()} />
             <Appbar.Content title={"Add Academic Month"} />
           </Appbar.Header>

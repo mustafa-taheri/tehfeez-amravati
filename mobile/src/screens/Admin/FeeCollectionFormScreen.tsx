@@ -118,7 +118,11 @@ export default function FeeCollectionFormScreen({ navigation }: any) {
     <PaperProvider theme={forcedLightTheme}>
       <Portal.Host>
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
-          <Appbar.Header mode="small" style={styles.appBar}>
+          <Appbar.Header
+            mode="small"
+            statusBarHeight={0}
+            style={[styles.appBar, { height: 60 }]}
+          >
             <Appbar.BackAction onPress={() => navigation.goBack()} />
             <Appbar.Content title="Create Fee Collection" />
           </Appbar.Header>
