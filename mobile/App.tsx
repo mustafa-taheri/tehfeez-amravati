@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { MD3LightTheme, Provider as PaperProvider } from "react-native-paper";
+import {
+  MD3LightTheme,
+  DefaultTheme,
+  Provider as PaperProvider,
+} from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { AuthProvider } from "./src/context/AuthContext";
@@ -8,9 +12,11 @@ import SplashScreen from "./src/components/SplashScreen";
 // Explicitly lock the configuration to Light Mode
 export const forcedLightTheme = {
   ...MD3LightTheme,
+  ...DefaultTheme,
   dark: false,
   colors: {
     ...MD3LightTheme.colors,
+    ...DefaultTheme.colors,
   },
 };
 
