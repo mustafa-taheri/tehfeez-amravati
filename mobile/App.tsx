@@ -6,7 +6,7 @@ import { AuthProvider } from "./src/context/AuthContext";
 import SplashScreen from "./src/components/SplashScreen";
 
 // Explicitly lock the configuration to Light Mode
-const forcedLightTheme = {
+export const forcedLightTheme = {
   ...MD3LightTheme,
   dark: false,
   colors: {

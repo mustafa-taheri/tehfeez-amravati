@@ -23,6 +23,10 @@
     "web": {
       "favicon": "./assets/quran-tehfeez-favicon-48x48.png"
     },
+    "splash": {
+      "image": "./assets/transparent.png",
+      "backgroundColor": "#ffffff"
+    },
     "extra": {
       "API_URL": "https://tehfeez-amravati.onrender.com/api/v1",
       "eas": {

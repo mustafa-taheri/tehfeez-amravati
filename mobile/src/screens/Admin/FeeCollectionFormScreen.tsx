@@ -8,11 +8,13 @@ import {
   HelperText,
   useTheme,
   Portal,
+  MD3LightTheme,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
 import apiClient from "../../api/client";
+import { forcedLightTheme } from "../../../App";
 
 export default function FeeCollectionFormScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
@@ -113,7 +115,7 @@ export default function FeeCollectionFormScreen({ navigation }: any) {
   };
 
   return (
-    <PaperProvider>
+    <PaperProvider theme={forcedLightTheme}>
       <Portal.Host>
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
           <Appbar.Header mode="small" style={styles.appBar}>

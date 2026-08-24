@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
 import apiClient from "../../api/client";
+import { forcedLightTheme } from "../../../App";
 
 export default function HuffazPayableListScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
@@ -119,7 +120,7 @@ export default function HuffazPayableListScreen({ navigation }: any) {
   };
 
   return (
-    <PaperProvider>
+    <PaperProvider theme={forcedLightTheme}>
       <Portal.Host>
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
           <Appbar.Header mode="small" style={styles.appBar}>

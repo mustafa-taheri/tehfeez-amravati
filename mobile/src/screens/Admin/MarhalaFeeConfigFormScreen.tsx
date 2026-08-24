@@ -16,6 +16,7 @@ import { Dropdown } from "react-native-paper-dropdown";
 import { validateDDMMYYYY } from "../../utils/dateValidation";
 import { Alert } from "react-native";
 import apiClient from "../../api/client";
+import { forcedLightTheme } from "../../../App";
 
 export default function MarhalaFeeConfigFormScreen({ navigation, route }: any) {
   const { config } = route.params || {};
@@ -130,7 +131,7 @@ export default function MarhalaFeeConfigFormScreen({ navigation, route }: any) {
   };
 
   return (
-    <PaperProvider>
+    <PaperProvider theme={forcedLightTheme}>
       <Portal.Host>
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
           <Appbar.Header mode="small" style={styles.appBar}>

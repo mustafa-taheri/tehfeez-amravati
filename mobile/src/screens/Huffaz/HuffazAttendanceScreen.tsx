@@ -12,6 +12,7 @@ import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Dropdown } from "react-native-paper-dropdown";
 import { Provider as PaperProvider } from "react-native-paper";
 import { AuthContext } from "../../context/AuthContext";
+import { forcedLightTheme } from "../../../App";
 
 const HuffazAttendanceScreen = ({ navigation, route }: any) => {
   const { user } = useContext(AuthContext);
@@ -89,7 +90,7 @@ const HuffazAttendanceScreen = ({ navigation, route }: any) => {
   );
 
   return (
-    <PaperProvider>
+    <PaperProvider theme={forcedLightTheme}>
       <Portal.Host>
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
           <Appbar.Header mode="small" style={styles.appBar}>

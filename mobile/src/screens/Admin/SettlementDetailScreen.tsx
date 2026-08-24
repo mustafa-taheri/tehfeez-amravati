@@ -17,6 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
 import apiClient from "../../api/client";
+import { forcedLightTheme } from "../../../App";
 
 export default function SettlementDetailScreen({ navigation, route }: any) {
   const { settlementId } = route.params;
@@ -140,7 +141,7 @@ export default function SettlementDetailScreen({ navigation, route }: any) {
   const isLocked = settlement.settlementStatus === "LOCKED";
 
   return (
-    <PaperProvider>
+    <PaperProvider theme={forcedLightTheme}>
       <Portal.Host>
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
           <Appbar.Header mode="small" style={styles.appBar}>
