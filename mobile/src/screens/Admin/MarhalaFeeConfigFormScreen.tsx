@@ -156,6 +156,15 @@ export default function MarhalaFeeConfigFormScreen({ navigation, route }: any) {
               options={academicPeriodsOptions}
               selectedValue={academicPeriodId}
               onValueChange={(value) => setAcademicPeriodId(value)}
+              dropdownStyle={{
+                minHeight: 48,
+                elevation: 2,
+                paddingVertical: 15,
+                paddingHorizontal: 16,
+              }}
+              dropdownIconStyle={{
+                top: 55,
+              }}
             />
 
             <DropdownSelect
@@ -163,6 +172,15 @@ export default function MarhalaFeeConfigFormScreen({ navigation, route }: any) {
               options={marhalasOptions}
               selectedValue={marhalaId}
               onValueChange={(value) => setMarhalaId(value)}
+              dropdownStyle={{
+                minHeight: 48,
+                elevation: 2,
+                paddingVertical: 15,
+                paddingHorizontal: 16,
+              }}
+              dropdownIconStyle={{
+                top: 55,
+              }}
             />
 
             <TextInput

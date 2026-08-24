@@ -139,6 +139,15 @@ export default function FeeCollectionFormScreen({ navigation }: any) {
               options={studentsOptions}
               selectedValue={studentId}
               onValueChange={(value) => setStudentId(value)}
+              dropdownStyle={{
+                minHeight: 48,
+                elevation: 2,
+                paddingVertical: 15,
+                paddingHorizontal: 16,
+              }}
+              dropdownIconStyle={{
+                top: 55,
+              }}
             />
 
             <DropdownSelect
@@ -146,6 +155,15 @@ export default function FeeCollectionFormScreen({ navigation }: any) {
               options={academicMonthsOptions}
               selectedValue={academicMonthId}
               onValueChange={(value) => setAcademicMonthId(value)}
+              dropdownStyle={{
+                minHeight: 48,
+                elevation: 2,
+                paddingVertical: 15,
+                paddingHorizontal: 16,
+              }}
+              dropdownIconStyle={{
+                top: 55,
+              }}
             />
 
             <DropdownSelect
@@ -153,6 +171,15 @@ export default function FeeCollectionFormScreen({ navigation }: any) {
               options={feeConfigsOptions}
               selectedValue={marhalaFeeConfigurationId}
               onValueChange={(value) => handleConfigSelect(value)}
+              dropdownStyle={{
+                minHeight: 48,
+                elevation: 2,
+                paddingVertical: 15,
+                paddingHorizontal: 16,
+              }}
+              dropdownIconStyle={{
+                top: 55,
+              }}
             />
 
             <TextInput

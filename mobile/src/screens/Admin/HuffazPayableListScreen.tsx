@@ -138,6 +138,15 @@ export default function HuffazPayableListScreen({ navigation }: any) {
               options={academicMonthsOptions}
               selectedValue={selectedMonth}
               onValueChange={(value) => setSelectedMonth(value)}
+              dropdownStyle={{
+                minHeight: 48,
+                elevation: 2,
+                paddingVertical: 15,
+                paddingHorizontal: 16,
+              }}
+              dropdownIconStyle={{
+                top: 55,
+              }}
             />
 
             {loading ? (

@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error("Error reading AsyncStorage:", error);
     }
   };
-  // checkStorage();
+  checkStorage();
   useEffect(() => {
     const bootstrapAsync = async () => {
       try {

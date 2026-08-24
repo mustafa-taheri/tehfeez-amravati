@@ -275,7 +275,16 @@ export default function SettlementDetailScreen({ navigation, route }: any) {
                 label={"Adjustment Type"}
                 options={adjTypeOptions}
                 selectedValue={adjType}
-                onValueChange={(value) => setAdjType()}
+                onValueChange={(value) => setAdjType(value)}
+                dropdownStyle={{
+                  minHeight: 48,
+                  elevation: 2,
+                  paddingVertical: 15,
+                  paddingHorizontal: 16,
+                }}
+                dropdownIconStyle={{
+                  top: 55,
+                }}
               />
               <TextInput
                 label="Amount (₹)"

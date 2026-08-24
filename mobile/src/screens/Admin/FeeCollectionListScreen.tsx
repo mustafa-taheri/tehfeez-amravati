@@ -156,6 +156,15 @@ export default function FeeCollectionListScreen({ navigation }: any) {
               options={academicMonthsOptions}
               selectedValue={selectedMonth}
               onValueChange={setSelectedMonth}
+              dropdownStyle={{
+                minHeight: 48,
+                elevation: 2,
+                paddingVertical: 15,
+                paddingHorizontal: 16,
+              }}
+              dropdownIconStyle={{
+                top: 55,
+              }}
             />
             {loading ? (
               <ActivityIndicator size="large" style={styles.loader} />

@@ -113,12 +113,21 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
               options={periodsOptions}
               selectedValue={selectedPeriodId}
               onValueChange={(value) => setSelectedPeriodId(value)}
+              dropdownStyle={{
+                minHeight: 48,
+                elevation: 2,
+                paddingVertical: 15,
+                paddingHorizontal: 16,
+              }}
+              dropdownIconStyle={{
+                top: 55,
+              }}
             />
             <TextInput
               label="Month Name *"
               value={monthName}
               onChangeText={setMonthName}
-              style={[styles.field, { marginTop: 14 }]}
+              style={[styles.field]}
               mode="outlined"
             />
             <TextInput
