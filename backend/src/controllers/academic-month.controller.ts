@@ -191,3 +191,143 @@ export const getAcademicMonthsOfActivePeriod = async (
     });
   }
 };
+
+
+export const updateAcademicPeriod = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const id = req.params.id;
+    const { name, startDate, endDate, isCurrent } = req.body;
+
+    const existing = await prisma.academicPeriod.findUnique({ where: { id } });
+    if (!existing) {
+      res.status(404).json({ success: false, message: "Academic period not found." });
+      return;
+    }
+
+    if (isCurrent === true) {
+      await prisma.$transaction([
+        prisma.academicPeriod.updateMany({
+          where: { id: { not: id } },
+          data: { isCurrent: false },
+        }),
+        prisma.academicPeriod.update({
+          where: { id },
+          data: {
+            name: name ?? existing.name,
+            startDate: startDate ? new Date(startDate) : existing.startDate,
+            endDate: endDate ? new Date(endDate) : existing.endDate,
+            isCurrent: true,
+          },
+        }),
+        prisma.academicMonth.updateMany({
+          where: { academicPeriodId: id },
+          data: { isActive: true },
+        }),
+        prisma.academicMonth.updateMany({
+          where: { academicPeriodId: { not: id } },
+          data: { isActive: false },
+        }),
+      ]);
+    } else if (isCurrent === false) {
+      await prisma.$transaction([
+        prisma.academicPeriod.update({
+          where: { id },
+          data: {
+            name: name ?? existing.name,
+            startDate: startDate ? new Date(startDate) : existing.startDate,
+            endDate: endDate ? new Date(endDate) : existing.endDate,
+            isCurrent: false,
+          },
+        }),
+        prisma.academicMonth.updateMany({
+          where: { academicPeriodId: id },
+          data: { isActive: false },
+        }),
+      ]);
+    } else {
+      await prisma.academicPeriod.update({
+        where: { id },
+        data: {
+          name: name ?? existing.name,
+          startDate: startDate ? new Date(startDate) : existing.startDate,
+          endDate: endDate ? new Date(endDate) : existing.endDate,
+        },
+      });
+    }
+
+    res.status(200).json({ success: true, message: "Academic period updated successfully." });
+  } catch (error: any) {
+    console.error("updateAcademicPeriod error:", error);
+    res.status(500).json({ success: false, message: "Internal server error." });
+  }
+};
+
+
+export const updateAcademicMonth = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const id = req.params.id;
+    const { name, startDate, endDate, isCurrent } = req.body;
+
+    const existing = await prisma.academicMonth.findUnique({ where: { id } });
+    if (!existing) {
+      res.status(404).json({ success: false, message: "Academic month not found." });
+      return;
+    }
+
+    if (isCurrent === true) {
+      await prisma.$transaction([
+        prisma.academicMonth.updateMany({
+          where: { id: { not: id } },
+          data: { isCurrent: false },
+        }),
+        prisma.academicMonth.update({
+          where: { id },
+          data: {
+            name: name ?? existing.name,
+            startDate: startDate ? new Date(startDate) : existing.startDate,
+            endDate: endDate ? new Date(endDate) : existing.endDate,
+            isCurrent: true,
+          },
+        }),
+      ]);
+    } else {
+      await prisma.academicMonth.update({
+        where: { id },
+        data: {
+          name: name ?? existing.name,
+          startDate: startDate ? new Date(startDate) : existing.startDate,
+          endDate: endDate ? new Date(endDate) : existing.endDate,
+          isCurrent: isCurrent ?? existing.isCurrent,
+        },
+      });
+    }
+
+    res.status(200).json({ success: true, message: "Academic month updated successfully." });
+  } catch (error: any) {
+    console.error("updateAcademicMonth error:", error);
+    res.status(500).json({ success: false, message: "Internal server error." });
+  }
+};
+
+
+export const getAcademicMonths = async (
+  _req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const months = await prisma.academicMonth.findMany({
+      orderBy: [{ year: "desc" }, { monthNumber: "desc" }],
+      include: { academicPeriod: { select: { name: true } } }
+    });
+    res.status(200).json({ success: true, data: months });
+  } catch (error: any) {
+    console.error("getAcademicMonths error:", error);
+    res.status(500).json({ success: false, message: "Internal server error." });
+  }
+};
