@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
 import { RefreshControl } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
 
 export default function HuffazListScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
@@ -22,10 +23,13 @@ export default function HuffazListScreen({ navigation }: any) {
   const [filtered, setFiltered] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const { colors } = useTheme();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    fetchHuffaz();
-  }, []);
+    if (isFocused) {
+      fetchHuffaz();
+    }
+  }, [isFocused]);
 
   const fetchHuffaz = async (isRefreshing = false) => {
     try {

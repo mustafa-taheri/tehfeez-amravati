@@ -17,16 +17,20 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
+import { useIsFocused } from "@react-navigation/native";
 
 export default function MarhalaFeeConfigListScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [configs, setConfigs] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const { colors } = useTheme();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    fetchConfigs();
-  }, []);
+    if (isFocused) {
+      fetchConfigs();
+    }
+  }, [isFocused]);
 
   const fetchConfigs = async (isRefreshing = false) => {
     try {

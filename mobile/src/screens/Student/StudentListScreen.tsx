@@ -21,6 +21,7 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
+import { useIsFocused } from "@react-navigation/native";
 
 export default function StudentListScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
@@ -29,10 +30,13 @@ export default function StudentListScreen({ navigation }: any) {
   const [filteredStudents, setFilteredStudents] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const { colors } = useTheme();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    fetchStudents();
-  }, []);
+    if (isFocused) {
+      fetchStudents();
+    }
+  }, [isFocused]);
 
   const fetchStudents = async (isRefreshing = false) => {
     try {

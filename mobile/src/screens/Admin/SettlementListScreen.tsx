@@ -16,16 +16,20 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/client";
+import { useIsFocused } from "@react-navigation/native";
 
 export default function SettlementListScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [settlements, setSettlements] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const { colors } = useTheme();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    fetchSettlements();
-  }, []);
+    if (isFocused) {
+      fetchSettlements();
+    }
+  }, [isFocused]);
 
   const fetchSettlements = async (isRefreshing = false) => {
     try {
