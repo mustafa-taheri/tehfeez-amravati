@@ -13,6 +13,7 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
   const [monthNumber, setMonthNumber] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [workingDays, setWorkingDays] = useState("26");
   const [selectedPeriodId, setSelectedPeriodId] = useState("");
   const [loading, setLoading] = useState(false);
   const [periodsOptions, setPeriodsOptions] = useState<any[]>([]);
@@ -71,6 +72,7 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
         startDate,
         endDate,
         academicPeriodId: selectedPeriodId,
+        workingDays: parseInt(workingDays),
       });
 
       if (response.data.success) {
@@ -148,6 +150,14 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
               label="End Date (DD-MM-YYYY) *"
               value={endDate}
               onChangeText={setEndDate}
+              style={styles.field}
+              mode="outlined"
+            />
+            <TextInput
+              label="Working Days "
+              value={workingDays}
+              onChangeText={setWorkingDays}
+              keyboardType="numeric"
               style={styles.field}
               mode="outlined"
             />
