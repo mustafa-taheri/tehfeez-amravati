@@ -192,7 +192,6 @@ export const getAcademicMonthsOfActivePeriod = async (
   }
 };
 
-
 export const updateAcademicPeriod = async (
   req: Request,
   res: Response,
@@ -203,7 +202,9 @@ export const updateAcademicPeriod = async (
 
     const existing = await prisma.academicPeriod.findUnique({ where: { id } });
     if (!existing) {
-      res.status(404).json({ success: false, message: "Academic period not found." });
+      res
+        .status(404)
+        .json({ success: false, message: "Academic period not found." });
       return;
     }
 
@@ -258,13 +259,17 @@ export const updateAcademicPeriod = async (
       });
     }
 
-    res.status(200).json({ success: true, message: "Academic period updated successfully." });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Academic period updated successfully.",
+      });
   } catch (error: any) {
     console.error("updateAcademicPeriod error:", error);
     res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
-
 
 export const updateAcademicMonth = async (
   req: Request,
@@ -276,7 +281,9 @@ export const updateAcademicMonth = async (
 
     const existing = await prisma.academicMonth.findUnique({ where: { id } });
     if (!existing) {
-      res.status(404).json({ success: false, message: "Academic month not found." });
+      res
+        .status(404)
+        .json({ success: false, message: "Academic month not found." });
       return;
     }
 
@@ -308,13 +315,14 @@ export const updateAcademicMonth = async (
       });
     }
 
-    res.status(200).json({ success: true, message: "Academic month updated successfully." });
+    res
+      .status(200)
+      .json({ success: true, message: "Academic month updated successfully." });
   } catch (error: any) {
     console.error("updateAcademicMonth error:", error);
     res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
-
 
 export const getAcademicMonths = async (
   _req: Request,
@@ -322,8 +330,8 @@ export const getAcademicMonths = async (
 ): Promise<void> => {
   try {
     const months = await prisma.academicMonth.findMany({
-      orderBy: [{ year: "desc" }, { monthNumber: "desc" }],
-      include: { academicPeriod: { select: { name: true } } }
+      orderBy: [{ year: "desc" }, { monthNumber: "asc" }],
+      include: { academicPeriod: { select: { name: true } } },
     });
     res.status(200).json({ success: true, data: months });
   } catch (error: any) {
