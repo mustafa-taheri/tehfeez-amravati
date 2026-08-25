@@ -27,46 +27,52 @@ export default function StudentListScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [students, setStudents] = useState<any[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const { colors } = useTheme();
   const isFocused = useIsFocused();
+  
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (isFocused) {
-      fetchStudents();
+      setPage(1);
+      fetchStudents(1, false, debouncedSearchQuery);
     }
-  }, [isFocused]);
+  }, [isFocused, debouncedSearchQuery]);
 
-  const fetchStudents = async (isRefreshing = false) => {
+  const fetchStudents = async (pageNum = 1, isRefreshing = false, query = debouncedSearchQuery) => {
     try {
-      if (!isRefreshing) setLoading(true);
-      const response = await apiClient.get("/students");
+      if (!isRefreshing && pageNum === 1) setLoading(true);
+      if (pageNum > 1) setIsFetchingMore(true);
+      
+      const response = await apiClient.get(`/students?page=${pageNum}&pageSize=20&search=${encodeURIComponent(query)}`);
       if (response.data.success) {
-        setStudents(response.data.data);
-        setFilteredStudents(response.data.data);
+        if (pageNum === 1) {
+          setStudents(response.data.data);
+        } else {
+          setStudents(prev => [...prev, ...response.data.data]);
+        }
+        setHasNextPage(response.data.meta?.hasNextPage || false);
       }
     } catch (error: any) {
       console.error("Failed to fetch students", error?.response?.data?.message);
     } finally {
-      if (!isRefreshing) setLoading(false);
+      if (!isRefreshing && pageNum === 1) setLoading(false);
+      if (pageNum > 1) setIsFetchingMore(false);
     }
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    if (query) {
-      const lowercased = query.toLowerCase();
-      const filtered = students.filter(
-        (s) =>
-          s.firstName.toLowerCase().includes(lowercased) ||
-          (s.lastName && s.lastName.toLowerCase().includes(lowercased)) ||
-          s.itsNumber.includes(query),
-      );
-      setFilteredStudents(filtered);
-    } else {
-      setFilteredStudents(students);
-    }
   };
 
   const renderStudentItem = ({ item }: { item: any }) => (
@@ -98,9 +104,18 @@ export default function StudentListScreen({ navigation }: any) {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchStudents(true);
+    setPage(1);
+    await fetchStudents(1, true, debouncedSearchQuery);
     setRefreshing(false);
-  }, []);
+  }, [debouncedSearchQuery]);
+
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchStudents(nextPage, false, debouncedSearchQuery);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -126,7 +141,10 @@ export default function StudentListScreen({ navigation }: any) {
           <ActivityIndicator size="large" style={styles.loader} />
         ) : (
           <FlatList
-            data={filteredStudents}
+            data={students}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={isFetchingMore ? <ActivityIndicator style={{ margin: 20 }} color={colors.primary} /> : null}
             keyExtractor={(item) => item.id}
             renderItem={renderStudentItem}
             contentContainerStyle={styles.listContent}

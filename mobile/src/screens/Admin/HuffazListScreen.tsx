@@ -19,60 +19,75 @@ import { useIsFocused } from "@react-navigation/native";
 export default function HuffazListScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [huffazList, setHuffazList] = useState<any[]>([]);
-  const [filtered, setFiltered] = useState<any[]>([]);
+  const [huffaz, setHuffaz] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const { colors } = useTheme();
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    if (isFocused) {
-      fetchHuffaz();
-    }
-  }, [isFocused]);
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
-  const fetchHuffaz = async (isRefreshing = false) => {
+  useEffect(() => {
+    if (isFocused) {
+      setPage(1);
+      fetchHuffaz(1, false, debouncedSearchQuery);
+    }
+  }, [isFocused, debouncedSearchQuery]);
+
+  const fetchHuffaz = async (
+    pageNum = 1,
+    isRefreshing = false,
+    query = debouncedSearchQuery,
+  ) => {
     try {
-      if (!isRefreshing) setLoading(true);
-      const response = await apiClient.get("/huffaz");
+      if (!isRefreshing && pageNum === 1) setLoading(true);
+      if (pageNum > 1) setIsFetchingMore(true);
+
+      const response = await apiClient.get(
+        `/huffaz?page=${pageNum}&pageSize=20&search=${encodeURIComponent(query)}`,
+      );
       if (response.data.success) {
-        setHuffazList(response.data.data);
-        setFiltered(response.data.data);
+        if (pageNum === 1) {
+          setHuffaz(response.data.data);
+        } else {
+          setHuffaz((prev) => [...prev, ...response.data.data]);
+        }
+        setHasNextPage(response.data.meta?.hasNextPage || false);
       }
     } catch (error: any) {
-      console.error(
-        "Failed to fetch huffaz list",
-        error?.response?.data?.message,
-      );
+      console.error("Failed to fetch huffaz", error?.response?.data?.message);
     } finally {
-      if (!isRefreshing) setLoading(false);
+      if (!isRefreshing && pageNum === 1) setLoading(false);
+      if (pageNum > 1) setIsFetchingMore(false);
     }
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    if (!query) {
-      setFiltered(huffazList);
-      return;
-    }
-    const lower = query.toLowerCase();
-    setFiltered(
-      huffazList.filter(
-        (item) =>
-          item.firstName.toLowerCase().includes(lower) ||
-          item.lastName.toLowerCase().includes(lower) ||
-          item.username.toLowerCase().includes(lower) ||
-          item.email?.toLowerCase().includes(lower) ||
-          item.mobileNumber.includes(query),
-      ),
-    );
   };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchHuffaz();
+    setPage(1);
+    await fetchHuffaz(1, true, debouncedSearchQuery);
     setRefreshing(false);
-  }, []);
+  }, [debouncedSearchQuery]);
+
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchHuffaz(nextPage, false, debouncedSearchQuery);
+    }
+  };
 
   const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity
@@ -132,7 +147,17 @@ export default function HuffazListScreen({ navigation }: any) {
           <ActivityIndicator size="large" style={styles.loader} />
         ) : (
           <FlatList
-            data={filtered}
+            data={huffaz}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              isFetchingMore ? (
+                <ActivityIndicator
+                  style={{ margin: 20 }}
+                  color={colors.primary}
+                />
+              ) : null
+            }
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             contentContainerStyle={styles.list}

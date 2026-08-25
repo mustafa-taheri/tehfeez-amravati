@@ -208,10 +208,16 @@ export default function AdminDashboardScreen({ navigation }: any) {
                 onPress={() => navigation.navigate("FinanceReport")}
               />
               <ActionButton
+                title="Academic Year"
+                icon="calendar-range"
+                color="#3eb73a"
+                onPress={() => navigation.navigate("AcademicPeriodList")}
+              />
+              <ActionButton
                 title="Academic Month"
                 icon="calendar-month"
                 color="#795548"
-                onPress={() => navigation.navigate("AcademicMonthForm")}
+                onPress={() => navigation.navigate("AcademicMonthList")}
               />
               <ActionButton
                 title="Fee Configs"

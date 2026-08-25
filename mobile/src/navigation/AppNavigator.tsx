@@ -7,6 +7,9 @@ import { AuthContext } from "../context/AuthContext";
 // Screens
 import LoginScreen from "../screens/Auth/LoginScreen";
 import AdminDashboardScreen from "../screens/Admin/AdminDashboardScreen";
+import AcademicPeriodListScreen from "../screens/Admin/AcademicPeriodListScreen";
+import AcademicPeriodFormScreen from "../screens/Admin/AcademicPeriodFormScreen";
+import AcademicMonthListScreen from "../screens/Admin/AcademicMonthListScreen";
 import HuffazDashboardScreen from "../screens/Huffaz/HuffazDashboardScreen";
 import MarkAttendanceScreen from "../screens/Attendance/MarkAttendanceScreen";
 import StudentListScreen from "../screens/Student/StudentListScreen";
@@ -94,6 +97,18 @@ export default function AppNavigator() {
             <Stack.Screen name="HuffazForm" component={HuffazFormScreen} />
             <Stack.Screen name="StudentForm" component={StudentFormScreen} />
             <Stack.Screen
+              name="AcademicPeriodList"
+              component={AcademicPeriodListScreen}
+            />
+            <Stack.Screen
+              name="AcademicPeriodForm"
+              component={AcademicPeriodFormScreen}
+            />
+            <Stack.Screen
+              name="AcademicMonthList"
+              component={AcademicMonthListScreen}
+            />
+            <Stack.Screen
               name="AttendanceReport"
               component={AttendanceReportScreen}
             />
@@ -116,15 +131,42 @@ export default function AppNavigator() {
             />
 
             {/* New Features */}
-            <Stack.Screen name="MarhalaFeeConfigList" component={MarhalaFeeConfigListScreen} />
-            <Stack.Screen name="MarhalaFeeConfigForm" component={MarhalaFeeConfigFormScreen} />
-            <Stack.Screen name="FeeCollectionList" component={FeeCollectionListScreen} />
-            <Stack.Screen name="FeeCollectionForm" component={FeeCollectionFormScreen} />
-            <Stack.Screen name="FeeCollectionDetail" component={FeeCollectionDetailScreen} />
-            <Stack.Screen name="SettlementList" component={SettlementListScreen} />
-            <Stack.Screen name="SettlementDetail" component={SettlementDetailScreen} />
-            <Stack.Screen name="GenerateSettlement" component={GenerateSettlementScreen} />
-            <Stack.Screen name="HuffazPayableList" component={HuffazPayableListScreen} />
+            <Stack.Screen
+              name="MarhalaFeeConfigList"
+              component={MarhalaFeeConfigListScreen}
+            />
+            <Stack.Screen
+              name="MarhalaFeeConfigForm"
+              component={MarhalaFeeConfigFormScreen}
+            />
+            <Stack.Screen
+              name="FeeCollectionList"
+              component={FeeCollectionListScreen}
+            />
+            <Stack.Screen
+              name="FeeCollectionForm"
+              component={FeeCollectionFormScreen}
+            />
+            <Stack.Screen
+              name="FeeCollectionDetail"
+              component={FeeCollectionDetailScreen}
+            />
+            <Stack.Screen
+              name="SettlementList"
+              component={SettlementListScreen}
+            />
+            <Stack.Screen
+              name="SettlementDetail"
+              component={SettlementDetailScreen}
+            />
+            <Stack.Screen
+              name="GenerateSettlement"
+              component={GenerateSettlementScreen}
+            />
+            <Stack.Screen
+              name="HuffazPayableList"
+              component={HuffazPayableListScreen}
+            />
           </Stack.Group>
         )}
       </Stack.Navigator>

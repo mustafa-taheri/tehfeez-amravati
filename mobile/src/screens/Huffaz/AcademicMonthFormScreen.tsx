@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Appbar, Button, Portal, Text, TextInput } from "react-native-paper";
+import {
+  Appbar,
+  Button,
+  Portal,
+  Text,
+  TextInput,
+  Switch,
+  HelperText,
+} from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Alert, ScrollView, StyleSheet } from "react-native";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
 import apiClient from "../../api/client";
 import { validateDDMMYYYY } from "../../utils/dateValidation";
@@ -9,12 +17,32 @@ import DropdownSelect from "react-native-input-select";
 import { forcedLightTheme } from "../../../App";
 
 const AcademicMonthFormScreen = ({ navigation, route }: any) => {
-  const [monthName, setMonthName] = useState("");
-  const [monthNumber, setMonthNumber] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [workingDays, setWorkingDays] = useState("26");
-  const [selectedPeriodId, setSelectedPeriodId] = useState("");
+  const month = route.params?.month;
+  const isEditing = !!month;
+
+  const [monthName, setMonthName] = useState(month ? month.name : "");
+  const [monthNumber, setMonthNumber] = useState(
+    month ? month.monthNumber?.toString() : "",
+  );
+  const [startDate, setStartDate] = useState(
+    month?.startDate
+      ? new Date(month.startDate)
+          .toLocaleDateString("en-GB")
+          .replace(/\//g, "-")
+      : "",
+  );
+  const [endDate, setEndDate] = useState(
+    month?.endDate
+      ? new Date(month.endDate).toLocaleDateString("en-GB").replace(/\//g, "-")
+      : "",
+  );
+  const [workingDays, setWorkingDays] = useState(
+    month ? month.workingDays?.toString() : "26",
+  );
+  const [selectedPeriodId, setSelectedPeriodId] = useState(
+    month ? month.academicPeriodId : "",
+  );
+  const [isCurrent, setIsCurrent] = useState(month ? month.isCurrent : false);
   const [loading, setLoading] = useState(false);
   const [periodsOptions, setPeriodsOptions] = useState<any[]>([]);
 
@@ -66,14 +94,28 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
 
     setLoading(true);
     try {
-      const response = await apiClient.post("/academic-months/month/create", {
+      const payload = {
         name: monthName,
         monthNumber: parseInt(monthNumber),
-        startDate,
-        endDate,
+        startDate: startDate.split("-").reverse().join("-"),
+        endDate: endDate.split("-").reverse().join("-"),
         academicPeriodId: selectedPeriodId,
         workingDays: parseInt(workingDays),
-      });
+        isCurrent,
+      };
+
+      let response;
+      if (isEditing) {
+        response = await apiClient.put(
+          `/academic-months/month/${month.id}`,
+          payload,
+        );
+      } else {
+        response = await apiClient.post(
+          "/academic-months/month/create",
+          payload,
+        );
+      }
 
       if (response.data.success) {
         navigation.goBack();
@@ -90,7 +132,7 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
       );
       Alert.alert(
         "Error",
-        `An error occurred while creating the academic month. Please try again. ${error?.response?.data?.message || ""}`,
+        `An error occurred while saving the academic month. Please try again. ${error?.response?.data?.message || ""}`,
       );
     } finally {
       setLoading(false);
@@ -107,7 +149,9 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
             style={[styles.appBar, { height: 60 }]}
           >
             <Appbar.BackAction onPress={() => navigation.goBack()} />
-            <Appbar.Content title={"Add Academic Month"} />
+            <Appbar.Content
+              title={isEditing ? "Edit Academic Month" : "Add Academic Month"}
+            />
           </Appbar.Header>
           <ScrollView contentContainerStyle={styles.container}>
             <DropdownSelect
@@ -161,6 +205,17 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
               style={styles.field}
               mode="outlined"
             />
+            {isEditing && (
+              <View style={styles.switchContainer}>
+                <Text style={styles.switchLabel}>Mark as Current Month</Text>
+                <Switch value={isCurrent} onValueChange={setIsCurrent} />
+              </View>
+            )}
+            {isEditing && (
+              <HelperText type="info" visible={true}>
+                Setting this as current will deactivate all other months.
+              </HelperText>
+            )}
             <Button
               mode="contained"
               onPress={handleSubmit}
@@ -168,7 +223,7 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
               disabled={loading}
               style={styles.submitButton}
             >
-              Submit
+              {isEditing ? "Update" : "Submit"}
             </Button>
           </ScrollView>
         </SafeAreaView>
@@ -180,6 +235,18 @@ const AcademicMonthFormScreen = ({ navigation, route }: any) => {
 export default AcademicMonthFormScreen;
 
 const styles = StyleSheet.create({
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 10,
+    marginBottom: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+  },
+  switchLabel: { fontSize: 16, color: "#333" },
   safeArea: { flex: 1, backgroundColor: "#F7F9FC" },
   appBar: { backgroundColor: "#fff", elevation: 2 },
   container: { padding: 16, paddingBottom: 40 },

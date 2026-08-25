@@ -255,12 +255,17 @@ export default function HuffazDashboardScreen({ navigation }: any) {
                 onPress={() => navigation.navigate("Profile")}
               />
               <ActionButton
+                title="Academic Year"
+                icon="calendar-range"
+                color="#3EB73A"
+                onPress={() => navigation.navigate("AcademicPeriodList")}
+              />
+              <ActionButton
                 title="Academic Month"
                 icon="calendar-month"
                 color="#795548"
-                onPress={() => navigation.navigate("AcademicMonthForm")}
+                onPress={() => navigation.navigate("AcademicMonthList")}
               />
-            </View>
 
             <Title style={styles.sectionTitle}>Recent Sessions</Title>
             <Card style={styles.activityCard}>

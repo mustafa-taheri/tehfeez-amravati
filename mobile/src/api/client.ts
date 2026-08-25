@@ -65,10 +65,13 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    console.log("originalRequest ==> ", originalRequest);
 
     // Check if error is 401 and the request hasn't been retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
+        console.log("isRefreshing ==> ", isRefreshing);
+
         // Queue the request while waiting for the new token
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -91,6 +94,7 @@ apiClient.interceptors.response.use(
         const response = await axios.post(`${API_URL}/auth/refresh-token`, {
           refreshToken,
         });
+        console.log("response ==> ", response.data);
 
         const {
           accessToken: newAccessToken,
@@ -117,6 +121,8 @@ apiClient.interceptors.response.use(
         // Retry the original request
         return apiClient(originalRequest);
       } catch (refreshError) {
+        console.log("refreshError ==> ", refreshError);
+
         // Refresh token failed or expired -> log out the user
         processQueue(refreshError, null);
         await AsyncStorage.multiRemove([
