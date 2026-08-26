@@ -266,7 +266,7 @@ export default function HuffazDashboardScreen({ navigation }: any) {
                 color="#795548"
                 onPress={() => navigation.navigate("AcademicMonthList")}
               />
-
+            </View>
             <Title style={styles.sectionTitle}>Recent Sessions</Title>
             <Card style={styles.activityCard}>
               <Card.Content>
