@@ -20,10 +20,14 @@ export const getStudents = async (
 
     const where: any = { isActive: true };
     if (search) {
+      const searchAsNumber = parseInt(search, 10);
       where.OR = [
         { firstName: { contains: search, mode: "insensitive" } },
         { lastName: { contains: search, mode: "insensitive" } },
-        { itsNumber: { contains: search, mode: "insensitive" } },
+        // Only search by itsNumber if the search term is a valid number
+        ...(!isNaN(searchAsNumber)
+          ? [{ itsNumber: { equals: searchAsNumber } }]
+          : []),
       ];
     }
     if (status) {
