@@ -194,6 +194,77 @@ export const createStudent = async (
   }
 };
 
+// export const updateStudent = async (
+//   req: AuthRequest,
+//   res: Response,
+// ): Promise<void> => {
+//   try {
+//     const studentId =
+//       typeof req.params.studentId === "string"
+//         ? req.params.studentId
+//         : undefined;
+//     if (!studentId) {
+//       res.status(400).json({ success: false, message: "Invalid student id." });
+//       return;
+//     }
+//     const data = req.body;
+
+//     const student = await prisma.student.findUnique({
+//       where: { id: studentId },
+//     });
+//     if (!student || !student.isActive) {
+//       res.status(404).json({
+//         success: false,
+//         message: "Student not found",
+//         code: "RESOURCE_NOT_FOUND",
+//       });
+//       return;
+//     }
+
+//     // Check if there is a Promotion/Demotion in Marhala
+
+//     if(student?.currentMarhalaId !== data?.currentMarhalaId) {
+//       const updateCurrentMarhala = await prisma.marhalaHistory.create({
+//         data:{
+//           studentId,
+//   fromMarhalaId :student?.currentMarhalaId,
+//   toMarhalaId : data?.currentMarhalaId,
+//   promotedBy : req.user?.userId
+//         }
+//       })
+//     }
+
+//     const updated = await prisma.student.update({
+//       where: { id: studentId },
+//       data: {
+//         ...data,
+//         dateOfBirth: data.dateOfBirth
+//           ? dayjs.utc(data.dateOfBirth, "DD-MM-YYYY", true).toDate()
+//           : undefined,
+//         admissionDate: data.admissionDate
+//           ? dayjs.utc(data.admissionDate, "DD-MM-YYYY", true).toDate()
+//           : undefined,
+//         updatedBy: req.user?.userId,
+//       },
+//     });
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Student updated successfully.",
+//       data: updated,
+//     });
+//   } catch (error: any) {
+//     console.log(error);
+
+//     res.status(500).json({
+//       success: false,
+//       message:
+//         "Sorry.. Unable to update student details. Internal server error.",
+//       code: "INTERNAL_SERVER_ERROR",
+//     });
+//   }
+// };
+
 export const updateStudent = async (
   req: AuthRequest,
   res: Response,
@@ -203,15 +274,20 @@ export const updateStudent = async (
       typeof req.params.studentId === "string"
         ? req.params.studentId
         : undefined;
+
     if (!studentId) {
       res.status(400).json({ success: false, message: "Invalid student id." });
       return;
     }
-    const data = req.body;
 
+    const data = req.body;
+    const userId = req.user?.userId;
+
+    // 1. Fetch current student to check existence and current Marhala
     const student = await prisma.student.findUnique({
       where: { id: studentId },
     });
+
     if (!student || !student.isActive) {
       res.status(404).json({
         success: false,
@@ -221,18 +297,41 @@ export const updateStudent = async (
       return;
     }
 
-    const updated = await prisma.student.update({
-      where: { id: studentId },
-      data: {
-        ...data,
-        dateOfBirth: data.dateOfBirth
-          ? dayjs.utc(data.dateOfBirth, "DD-MM-YYYY", true).toDate()
-          : undefined,
-        admissionDate: data.admissionDate
-          ? dayjs.utc(data.admissionDate, "DD-MM-YYYY", true).toDate()
-          : undefined,
-        updatedBy: req.user?.userId,
-      },
+    // 2. Prepare payload formatting
+    const formattedData = {
+      ...data,
+      dateOfBirth: data.dateOfBirth
+        ? dayjs.utc(data.dateOfBirth, "DD-MM-YYYY", true).toDate()
+        : undefined,
+      admissionDate: data.admissionDate
+        ? dayjs.utc(data.admissionDate, "DD-MM-YYYY", true).toDate()
+        : undefined,
+      updatedBy: userId,
+    };
+
+    // 3. Execute both operations atomically in a transaction
+    const updated = await prisma.$transaction(async (tx) => {
+      // Create history record only if Marhala ID has changed
+      if (
+        data.currentMarhalaId &&
+        student.currentMarhalaId !== data.currentMarhalaId
+      ) {
+        await tx.marhalaHistory.create({
+          data: {
+            studentId,
+            fromMarhalaId: student.currentMarhalaId,
+            toMarhalaId: data.currentMarhalaId,
+            promotedBy: userId,
+            reason: "System detected change of Marhala ID",
+          },
+        });
+      }
+
+      // Update student details
+      return await tx.student.update({
+        where: { id: studentId },
+        data: formattedData,
+      });
     });
 
     res.status(200).json({
@@ -241,7 +340,7 @@ export const updateStudent = async (
       data: updated,
     });
   } catch (error: any) {
-    console.log(error);
+    console.error("Update Student Error:", error);
 
     res.status(500).json({
       success: false,
