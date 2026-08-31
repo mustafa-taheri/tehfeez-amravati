@@ -87,7 +87,11 @@ export default function AcademicPeriodFormScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Appbar.Header style={styles.appBar}>
+      <Appbar.Header
+        mode="small"
+        statusBarHeight={0}
+        style={[styles.appBar, { height: 60 }]}
+      >
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content
           title={isEditing ? "Edit Academic Period" : "New Academic Period"}

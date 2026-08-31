@@ -14,8 +14,6 @@ export const markStudentAttendance = async (
   req: AuthRequest,
   res: Response,
 ): Promise<void> => {
-  console.log(req.body);
-
   try {
     const {
       studentId,

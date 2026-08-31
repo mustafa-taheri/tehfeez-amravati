@@ -101,8 +101,6 @@ export default function StudentFormScreen({ navigation, route }: any) {
       };
 
       if (existingStudent) {
-        console.log("Existing Student Called", existingStudent.id, payload);
-
         const response = await apiClient.put(
           `/students/${existingStudent.id}`,
           payload,
@@ -111,8 +109,6 @@ export default function StudentFormScreen({ navigation, route }: any) {
           navigation.goBack();
         }
       } else {
-        console.log("New Student", payload);
-
         const response = await apiClient.post("/students", payload);
         if (response.data.success) {
           navigation.goBack();
