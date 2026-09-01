@@ -59,7 +59,7 @@ export default function StudentDetailScreen({ route, navigation }: any) {
   const fetchRecentSessions = async () => {
     try {
       const response = await apiClient.get(
-        `/quran-sessions?studentId=${studentId}`,
+        `/quran-sessions?studentId=${studentId}&pageSize=3`,
       );
       if (response.data.success) {
         setRecentSessions(response.data.data);
@@ -212,7 +212,26 @@ export default function StudentDetailScreen({ route, navigation }: any) {
           </Button>
         </View>
 
-        <Title style={styles.sectionTitleList}>Recent Quran Journey</Title>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          <Title style={styles.sectionTitleList}>Recent Quran Journey</Title>
+          <Text
+            style={{ paddingTop: 10 }}
+            variant="titleSmall"
+            onPress={() =>
+              navigation.navigate("QuranSessions", {
+                studentId: studentId,
+              })
+            }
+          >
+            View All
+          </Text>
+        </View>
         {recentSessions.length === 0 ? (
           <Card style={styles.emptyCard}>
             <Card.Content>
@@ -259,6 +278,17 @@ export default function StudentDetailScreen({ route, navigation }: any) {
                     ]}
                   >
                     Note: {session.remarks}
+                  </Text>
+                )}
+                {session?.huffaz && (
+                  <Text
+                    style={[
+                      styles.sessionDetail,
+                      { fontStyle: "italic", marginTop: 5 },
+                    ]}
+                  >
+                    Recorded By:{" "}
+                    {`${session?.huffaz?.firstName} ${session?.huffaz?.lastName}`}
                   </Text>
                 )}
               </Card.Content>

@@ -37,6 +37,7 @@ import SettlementListScreen from "../screens/Admin/SettlementListScreen";
 import SettlementDetailScreen from "../screens/Admin/SettlementDetailScreen";
 import GenerateSettlementScreen from "../screens/Admin/GenerateSettlementScreen";
 import HuffazPayableListScreen from "../screens/Admin/HuffazPayableListScreen";
+import SessionListScreen from "../screens/Student/SessionListScreen";
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -89,6 +90,7 @@ export default function AppNavigator() {
               name="RecordSession"
               component={RecordSessionScreen}
             />
+            <Stack.Screen name="QuranSessions" component={SessionListScreen} />
             <Stack.Screen
               name="FinanceReport"
               component={FinanceReportScreen}
