@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Qism Al-Tehfeez Amravati",
+    "slug": "tehfeez-amravati",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/quran-tehfeez-app-logo-1024x1024.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "userInterfaceStyle": "light"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff",
+        "foregroundImage": "./assets/quran-tehfeez-adaptive-foreground-432x432-small.png",
+        "monochromeImage": "./assets/quran-tehfeez-adaptive-foreground-432x432-small.png",
+        "userInterfaceStyle": "light"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.fatemicreatorsteam.tehfeezamravati"
+    },
+    "web": {
+      "favicon": "./assets/quran-tehfeez-favicon-48x48.png"
+    },
+    "extra": {
+      "API_URL": "https://tehfeez-amravati.onrender.com/api/v1",
+      "eas": {
+        "projectId": "0373a26a-aeca-4721-8f5a-af5bddb53a62"
+      }
+    },
+    "owner": "fatemi-creators-team",
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/transparent.png",
+          "backgroundColor": "#ffffff",
+          "resizeMode": "contain"
+        }
+      ]
+    ]
+  }
+}

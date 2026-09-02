@@ -1,0 +1,1212 @@
+import type { Response } from "express";
+import type { PaymentStatus } from "@prisma/client";
+import { prisma } from "../utils/db.js";
+import type { AuthRequest } from "../middlewares/auth.middleware.js";
+import dayjs from "dayjs";
+import { calculateMonthlyHuffazPayables } from "../services/huffaz-payable.service.js";
+
+const calculatePaymentStatus = (
+  configuredFee: number,
+  discountAmount: number,
+  waivedAmount: number,
+  totalReceivedAmount: number,
+) => {
+  const due = configuredFee - discountAmount - waivedAmount;
+  const outstanding = Math.max(due - totalReceivedAmount, 0);
+
+  if (outstanding <= 0) {
+    return "PAID";
+  }
+  if (totalReceivedAmount > 0) {
+    return "PARTIAL_PAID";
+  }
+  if (waivedAmount >= configuredFee) {
+    return "WAIVED";
+  }
+  if (discountAmount > 0) {
+    return "DISCOUNTED";
+  }
+  return "UNPAID";
+};
+
+const roundToTwo = (value: number) => Math.round(value * 100) / 100;
+
+// ------------------------------------------------------------------
+// Student Fee Collection
+// ------------------------------------------------------------------
+export const createFeeCollection = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const studentId = req.body.studentId as string | undefined;
+    const academicMonthId = req.body.academicMonthId as string | undefined;
+    const marhalaFeeConfigurationId = req.body.marhalaFeeConfigurationId as
+      | string
+      | undefined;
+    const configuredFee = Number(req.body.configuredFee);
+    const discountAmount =
+      req.body.discountAmount !== undefined
+        ? Number(req.body.discountAmount)
+        : 0;
+    const waivedAmount =
+      req.body.waivedAmount !== undefined ? Number(req.body.waivedAmount) : 0;
+    const remarks = req.body.remarks as string | undefined;
+
+    if (
+      !studentId ||
+      !academicMonthId ||
+      !marhalaFeeConfigurationId ||
+      req.body.configuredFee === undefined
+    ) {
+      res.status(400).json({
+        success: false,
+        message:
+          "studentId, academicMonthId, marhalaFeeConfigurationId, and configuredFee are required.",
+      });
+      return;
+    }
+
+    const existing = await prisma.studentFeeCollection.findUnique({
+      where: { studentId_academicMonthId: { studentId, academicMonthId } },
+    });
+
+    if (existing) {
+      res.status(409).json({
+        success: false,
+        message: "Fee collection already exists for this student and month.",
+        code: "DUPLICATE_RECORD",
+      });
+      return;
+    }
+
+    const totalReceivedAmount = 0;
+    const outstandingAmount = Math.max(
+      configuredFee - discountAmount - waivedAmount,
+      0,
+    );
+    const paymentStatus = calculatePaymentStatus(
+      configuredFee,
+      discountAmount,
+      waivedAmount,
+      totalReceivedAmount,
+    );
+
+    const collection = await prisma.studentFeeCollection.create({
+      data: {
+        studentId,
+        academicMonthId,
+        marhalaFeeConfigurationId,
+        configuredFee,
+        discountAmount,
+        waivedAmount,
+        totalReceivedAmount,
+        outstandingAmount,
+        paymentStatus,
+        remarks: remarks ?? null,
+        createdBy: req.user!.userId,
+        updatedBy: req.user!.userId,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Fee collection record created successfully.",
+      data: collection,
+    });
+  } catch (error: any) {
+    console.error("createFeeCollection error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+export const updateFeeCollection = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const id = typeof req.params.id === "string" ? req.params.id : undefined;
+    const configuredFee =
+      req.body.configuredFee !== undefined
+        ? Number(req.body.configuredFee)
+        : undefined;
+    const discountAmount =
+      req.body.discountAmount !== undefined
+        ? Number(req.body.discountAmount)
+        : undefined;
+    const waivedAmount =
+      req.body.waivedAmount !== undefined
+        ? Number(req.body.waivedAmount)
+        : undefined;
+    const remarks = req.body.remarks as string | undefined;
+    const paymentStatus = req.body.paymentStatus as PaymentStatus | undefined;
+
+    if (!id) {
+      res
+        .status(400)
+        .json({ success: false, message: "Invalid fee collection id." });
+      return;
+    }
+
+    const collection = await prisma.studentFeeCollection.findUnique({
+      where: { id },
+    });
+    if (!collection) {
+      res.status(404).json({
+        success: false,
+        message: "Fee collection record not found.",
+        code: "RESOURCE_NOT_FOUND",
+      });
+      return;
+    }
+
+    const newConfiguredFee =
+      configuredFee !== undefined
+        ? configuredFee
+        : Number(collection.configuredFee);
+    const newDiscountAmount =
+      discountAmount !== undefined
+        ? discountAmount
+        : Number(collection.discountAmount);
+    const newWaivedAmount =
+      waivedAmount !== undefined
+        ? waivedAmount
+        : Number(collection.waivedAmount);
+    const totalReceivedAmount = Number(collection.totalReceivedAmount);
+    const outstandingAmount = Math.max(
+      newConfiguredFee -
+        newDiscountAmount -
+        newWaivedAmount -
+        totalReceivedAmount,
+      0,
+    );
+    const status =
+      paymentStatus ||
+      calculatePaymentStatus(
+        newConfiguredFee,
+        newDiscountAmount,
+        newWaivedAmount,
+        totalReceivedAmount,
+      );
+
+    const updated = await prisma.studentFeeCollection.update({
+      where: { id },
+      data: {
+        configuredFee: newConfiguredFee,
+        discountAmount: newDiscountAmount,
+        waivedAmount: newWaivedAmount,
+        outstandingAmount,
+        paymentStatus: status,
+        remarks: remarks ?? collection.remarks,
+        updatedBy: req.user!.userId,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Fee collection record updated successfully.",
+      data: updated,
+    });
+  } catch (error: any) {
+    console.error("updateFeeCollection error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+export const recordFeePayment = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const studentId = req.body.studentId as string | undefined;
+    const academicMonthId = req.body.academicMonthId as string | undefined;
+    const amount = Number(req.body.amount);
+    const paymentMode = req.body.paymentMode as string | undefined;
+    const referenceNumber = req.body.referenceNumber as string | undefined;
+    const remarks = req.body.remarks as string | undefined;
+
+    if (!studentId || !academicMonthId || req.body.amount === undefined) {
+      res.status(400).json({
+        success: false,
+        message: "studentId, academicMonthId, and amount are required.",
+      });
+      return;
+    }
+
+    const collection = await prisma.studentFeeCollection.findUnique({
+      where: { studentId_academicMonthId: { studentId, academicMonthId } },
+    });
+
+    if (!collection) {
+      res.status(404).json({
+        success: false,
+        message: "Fee collection record not found for this month.",
+      });
+      return;
+    }
+
+    const transaction = await prisma.feePaymentTransaction.create({
+      data: {
+        studentFeeCollectionId: collection.id,
+        amount,
+        paymentMode: paymentMode || "CASH",
+        referenceNumber: referenceNumber ?? null,
+        remarks: remarks ?? null,
+        receivedBy: req.user!.userId,
+      },
+    });
+
+    const totalReceivedAmount =
+      Number(collection.totalReceivedAmount) + Number(amount);
+    const outstandingAmount = Math.max(
+      Number(collection.configuredFee) -
+        Number(collection.discountAmount) -
+        Number(collection.waivedAmount) -
+        totalReceivedAmount,
+      0,
+    );
+    const paymentStatus = calculatePaymentStatus(
+      Number(collection.configuredFee),
+      Number(collection.discountAmount),
+      Number(collection.waivedAmount),
+      totalReceivedAmount,
+    );
+
+    const updatedCollection = await prisma.studentFeeCollection.update({
+      where: { id: collection.id },
+      data: {
+        totalReceivedAmount,
+        outstandingAmount,
+        paymentStatus,
+        collectedBy: req.user!.userId,
+        updatedBy: req.user!.userId,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Fee payment recorded successfully.",
+      data: { transaction, collection: updatedCollection },
+    });
+  } catch (error: any) {
+    console.error("recordFeePayment error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+export const getFeeCollections = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { academicMonthId, studentId, paymentStatus } = req.query;
+
+    const where: any = { isActive: true };
+    if (academicMonthId) where.academicMonthId = academicMonthId as string;
+    if (studentId) where.studentId = studentId as string;
+    if (paymentStatus) where.paymentStatus = paymentStatus as any;
+
+    const collections = await prisma.studentFeeCollection.findMany({
+      where,
+      include: {
+        student: {
+          select: {
+            fullName: true,
+            firstName: true,
+            lastName: true,
+            itsNumber: true,
+            currentMarhalaId: true,
+          },
+        },
+        academicMonth: { select: { id: true, name: true } },
+        marhalaFeeConfiguration: { include: { marhala: true } },
+      },
+    });
+
+    res.status(200).json({ success: true, data: collections });
+  } catch (error: any) {
+    console.error("getFeeCollections error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+// ------------------------------------------------------------------
+// Monthly Settlement
+// ------------------------------------------------------------------
+export const getMonthlySettlements = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { academicMonthId } = req.query;
+    const where: any = {};
+    if (academicMonthId) where.academicMonthId = academicMonthId as string;
+
+    const settlements = await prisma.monthlySettlement.findMany({
+      where,
+      include: {
+        academicMonth: {
+          select: {
+            id: true,
+            name: true,
+            monthNumber: true,
+            year: true,
+            settlementStatus: true,
+          },
+        },
+      },
+      orderBy: { generatedAt: "desc" },
+    });
+
+    res.status(200).json({ success: true, data: settlements });
+  } catch (error: any) {
+    console.error("getMonthlySettlements error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+export const getMonthlySettlementById = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const id = typeof req.params.id === "string" ? req.params.id : undefined;
+    if (!id) {
+      res
+        .status(400)
+        .json({ success: false, message: "Invalid settlement id." });
+      return;
+    }
+
+    const settlement = await prisma.monthlySettlement.findUnique({
+      where: { id },
+      include: {
+        academicMonth: {
+          select: {
+            id: true,
+            name: true,
+            monthNumber: true,
+            year: true,
+            workingDays: true,
+            settlementStatus: true,
+          },
+        },
+        monthlySettlementDetails: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                fullName: true,
+              },
+            },
+            adjustments: true,
+          },
+        },
+      },
+    });
+
+    if (!settlement) {
+      res.status(404).json({
+        success: false,
+        message: "Settlement not found.",
+        code: "RESOURCE_NOT_FOUND",
+      });
+      return;
+    }
+
+    res.status(200).json({ success: true, data: settlement });
+  } catch (error: any) {
+    console.error("getMonthlySettlementById error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+export const getHuffazPayables = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const academicMonthId =
+      typeof req.query.academicMonthId === "string"
+        ? req.query.academicMonthId
+        : undefined;
+
+    if (!academicMonthId) {
+      res.status(400).json({
+        success: false,
+        message: "academicMonthId is required.",
+      });
+      return;
+    }
+
+    const result = await calculateMonthlyHuffazPayables(academicMonthId);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        dailyPool: roundToTwo(result.dailyPool),
+        huffazPayables: result.huffazPayables,
+      },
+    });
+  } catch (error: any) {
+    console.error("getHuffazPayables error:", error);
+
+    if (error.message === "Academic month not found.") {
+      res.status(404).json({
+        success: false,
+        message: "Academic month not found.",
+        code: "RESOURCE_NOT_FOUND",
+      });
+      return;
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+export const getMyHuffazPayable = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+        code: "UNAUTHORIZED",
+      });
+      return;
+    }
+
+    const academicMonthId =
+      typeof req.query.academicMonthId === "string"
+        ? req.query.academicMonthId
+        : undefined;
+
+    if (!academicMonthId) {
+      res.status(400).json({
+        success: false,
+        message: "academicMonthId is required.",
+      });
+      return;
+    }
+
+    const result = await calculateMonthlyHuffazPayables(academicMonthId);
+
+    const myPayable = result.huffazPayables.find(
+      (item) => item.userId === userId,
+    );
+
+    if (!myPayable) {
+      res.status(404).json({
+        success: false,
+        message: "Huffaz payable record not found.",
+        code: "RESOURCE_NOT_FOUND",
+      });
+      return;
+    }
+
+    /*
+     * Get only this Huffaz's attendance
+     * for the attendance summary.
+     *
+     * IMPORTANT:
+     * This query is NOT used for calculating
+     * the payable amount.
+     */
+    const attendanceRecords = await prisma.huffazAttendance.findMany({
+      where: {
+        academicMonthId,
+        userId,
+      },
+      orderBy: {
+        attendanceDate: "asc",
+      },
+    });
+
+    const attendanceSummary = attendanceRecords.reduce(
+      (summary, record) => {
+        const dateKey = new Date(record.attendanceDate)
+          .toISOString()
+          .split("T")[0];
+
+        if (dateKey) {
+          summary.days.add(dateKey);
+        }
+
+        summary.statusCounts[record.attendanceStatus] =
+          (summary.statusCounts[record.attendanceStatus] ?? 0) + 1;
+
+        return summary;
+      },
+      {
+        days: new Set<string>(),
+        statusCounts: {} as Record<string, number>,
+      },
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        academicMonth: result.academicMonth,
+
+        dailyPool: roundToTwo(result.dailyPool),
+
+        myPayable,
+
+        attendanceSummary: {
+          totalRecords: attendanceRecords.length,
+
+          totalDays: attendanceSummary.days.size,
+
+          statusCounts: attendanceSummary.statusCounts,
+        },
+      },
+    });
+  } catch (error: any) {
+    console.error("getMyHuffazPayable error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+export const getFinanceReport = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const academicMonthId =
+      typeof req.query.academicMonthId === "string"
+        ? req.query.academicMonthId
+        : undefined;
+    if (!academicMonthId) {
+      res
+        .status(400)
+        .json({ success: false, message: "academicMonthId is required." });
+      return;
+    }
+
+    const academicMonth = await prisma.academicMonth.findUnique({
+      where: { id: academicMonthId },
+    });
+    if (!academicMonth) {
+      res.status(404).json({
+        success: false,
+        message: "Academic month not found.",
+        code: "RESOURCE_NOT_FOUND",
+      });
+      return;
+    }
+
+    const feeCollections = await prisma.studentFeeCollection.findMany({
+      where: { academicMonthId, isActive: true },
+      include: { marhalaFeeConfiguration: { include: { marhala: true } } },
+    });
+
+    const totalStudents = await prisma.student.count();
+    const totalConfiguredFees = roundToTwo(
+      feeCollections.reduce(
+        (sum, collection) => sum + Number(collection.configuredFee),
+        0,
+      ),
+    );
+    const totalDiscountAmount = roundToTwo(
+      feeCollections.reduce(
+        (sum, collection) => sum + Number(collection.discountAmount),
+        0,
+      ),
+    );
+    const totalWaivedAmount = roundToTwo(
+      feeCollections.reduce(
+        (sum, collection) => sum + Number(collection.waivedAmount),
+        0,
+      ),
+    );
+    const totalCollectedAmount = roundToTwo(
+      feeCollections.reduce(
+        (sum, collection) => sum + Number(collection.totalReceivedAmount),
+        0,
+      ),
+    );
+
+    const feeByMarhala = Object.values(
+      feeCollections.reduce(
+        (acc, collection) => {
+          const marhalaName = collection.marhalaFeeConfiguration.marhala.name;
+          if (!acc[marhalaName]) {
+            acc[marhalaName] = {
+              marhalaName,
+              studentCount: 0,
+              totalConfiguredFee: 0,
+              totalCollectedAmount: 0,
+            };
+          }
+          acc[marhalaName].studentCount += 1;
+          acc[marhalaName].totalConfiguredFee = roundToTwo(
+            acc[marhalaName].totalConfiguredFee +
+              Number(collection.configuredFee),
+          );
+          acc[marhalaName].totalCollectedAmount = roundToTwo(
+            acc[marhalaName].totalCollectedAmount +
+              Number(collection.totalReceivedAmount),
+          );
+          return acc;
+        },
+        {} as Record<
+          string,
+          {
+            marhalaName: string;
+            studentCount: number;
+            totalConfiguredFee: number;
+            totalCollectedAmount: number;
+          }
+        >,
+      ),
+    );
+
+    const attendanceRecords = await prisma.huffazAttendance.findMany({
+      where: { academicMonthId },
+      orderBy: { attendanceDate: "asc" },
+    });
+
+    const attendanceSummary = attendanceRecords.reduce(
+      (summary, record) => {
+        summary.totalRecords += 1;
+        const [dateKey] = record.attendanceDate.toISOString().split("T");
+        if (dateKey) {
+          summary.days.add(dateKey);
+        }
+        summary.statusCounts[record.attendanceStatus] =
+          (summary.statusCounts[record.attendanceStatus] || 0) + 1;
+        return summary;
+      },
+      {
+        totalRecords: 0,
+        days: new Set<string>(),
+        statusCounts: {} as Record<string, number>,
+      },
+    );
+
+    const activeHuffaz = await prisma.user.findMany({
+      where: { role: "HUFFAZ", isActive: true },
+      select: { id: true, fullName: true },
+    });
+
+    const dailyPool =
+      academicMonth.workingDays > 0
+        ? totalCollectedAmount / academicMonth.workingDays
+        : 0;
+    // const huffazPayables = buildHuffazPayables(
+    //   activeHuffaz,
+    //   attendanceRecords,
+    //   dailyPool,
+    //   academicMonth.workingDays,
+    // );
+
+    const monthlyHuffazPayables =
+      await calculateMonthlyHuffazPayables(academicMonthId);
+
+    console.log(monthlyHuffazPayables);
+
+    const settlement = await prisma.monthlySettlement.findUnique({
+      where: { academicMonthId },
+      include: { monthlySettlementDetails: true },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        academicMonth,
+        totalStudents,
+        totalConfiguredFees,
+        totalDiscountAmount,
+        totalWaivedAmount,
+        totalCollectedAmount,
+        dailyPool: roundToTwo(dailyPool),
+        feeByMarhala,
+        attendanceSummary: {
+          totalRecords: attendanceSummary.totalRecords,
+          totalDays: attendanceSummary.days.size,
+          statusCounts: attendanceSummary.statusCounts,
+        },
+        monthlyHuffazPayables: monthlyHuffazPayables,
+        settlement,
+      },
+    });
+  } catch (error: any) {
+    console.error("getFinanceReport error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+export const generateMonthlySettlement = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { academicMonthId } = req.body;
+
+    if (!academicMonthId) {
+      res.status(400).json({
+        success: false,
+        message: "academicMonthId is required.",
+      });
+      return;
+    }
+
+    const academicMonth = await prisma.academicMonth.findUnique({
+      where: {
+        id: academicMonthId,
+      },
+    });
+
+    if (!academicMonth) {
+      res.status(404).json({
+        success: false,
+        message: "Academic month not found.",
+        code: "RESOURCE_NOT_FOUND",
+      });
+      return;
+    }
+
+    if (academicMonth.settlementStatus === "LOCKED") {
+      res.status(400).json({
+        success: false,
+        message: "Academic month is already locked.",
+        code: "SETTLEMENT_LOCKED",
+      });
+      return;
+    }
+
+    /*
+     * ==================================================
+     * 1. Get Student Fee Information
+     * ==================================================
+     */
+
+    const feeCollections = await prisma.studentFeeCollection.findMany({
+      where: {
+        academicMonthId,
+        isActive: true,
+      },
+      include: {
+        student: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    const totalStudents = feeCollections.length;
+
+    const totalConfiguredFees = roundToTwo(
+      feeCollections.reduce(
+        (sum, collection) => sum + Number(collection.configuredFee ?? 0),
+        0,
+      ),
+    );
+
+    const totalDiscountAmount = roundToTwo(
+      feeCollections.reduce(
+        (sum, collection) => sum + Number(collection.discountAmount ?? 0),
+        0,
+      ),
+    );
+
+    const totalWaivedAmount = roundToTwo(
+      feeCollections.reduce(
+        (sum, collection) => sum + Number(collection.waivedAmount ?? 0),
+        0,
+      ),
+    );
+
+    const totalCollectedAmount = roundToTwo(
+      feeCollections.reduce(
+        (sum, collection) => sum + Number(collection.totalReceivedAmount ?? 0),
+        0,
+      ),
+    );
+
+    /*
+     * ==================================================
+     * 2. ONE SOURCE OF TRUTH
+     *
+     * All Huffaz payable calculations come from
+     * calculateMonthlyHuffazPayables().
+     * ==================================================
+     */
+
+    const payableCalculation =
+      await calculateMonthlyHuffazPayables(academicMonthId);
+
+    const { workingDays, huffazPayables } = payableCalculation;
+
+    /*
+     * ==================================================
+     * 3. Get Existing Settlement
+     * ==================================================
+     */
+
+    let settlement = await prisma.monthlySettlement.findUnique({
+      where: {
+        academicMonthId,
+      },
+    });
+
+    if (settlement && settlement.settlementStatus === "LOCKED") {
+      res.status(400).json({
+        success: false,
+        message: "Settlement is already locked for this month.",
+        code: "SETTLEMENT_LOCKED",
+      });
+      return;
+    }
+
+    /*
+     * Preserve existing Bonus/Deduction values
+     * when regenerating a settlement.
+     */
+
+    const existingDetails = settlement
+      ? await prisma.monthlySettlementDetail.findMany({
+          where: {
+            monthlySettlementId: settlement.id,
+          },
+        })
+      : [];
+
+    const detailsByHuffaz = new Map(
+      existingDetails.map((detail) => [detail.userId, detail]),
+    );
+
+    /*
+     * ==================================================
+     * 4. Create / Update Settlement
+     * ==================================================
+     */
+
+    const settlementData = {
+      academicMonthId,
+      totalStudents,
+      totalConfiguredFees,
+      totalDiscountAmount,
+      totalWaivedAmount,
+      totalCollectedAmount,
+      totalPayablePool: totalCollectedAmount,
+      settlementStatus: "GENERATED" as const,
+      generatedBy: req.user!.userId,
+    };
+
+    if (settlement) {
+      settlement = await prisma.monthlySettlement.update({
+        where: {
+          id: settlement.id,
+        },
+        data: settlementData,
+      });
+
+      await prisma.monthlySettlementDetail.deleteMany({
+        where: {
+          monthlySettlementId: settlement.id,
+        },
+      });
+    } else {
+      settlement = await prisma.monthlySettlement.create({
+        data: settlementData,
+      });
+    }
+
+    /*
+     * ==================================================
+     * 5. Generate Settlement Details
+     *
+     * calculatedAmount comes ONLY from the shared
+     * Huffaz payable calculation.
+     *
+     * Bonus/Deduction are applied AFTER that.
+     * ==================================================
+     */
+
+    const settlementDetails = huffazPayables.map(
+      ({ userId, attendanceDays, attendancePercentage, calculatedAmount }) => {
+        const existing = detailsByHuffaz.get(userId);
+
+        const bonusAmount = existing ? Number(existing.bonusAmount ?? 0) : 0;
+
+        const deductionAmount = existing
+          ? Number(existing.deductionAmount ?? 0)
+          : 0;
+
+        const finalPayableAmount = roundToTwo(
+          calculatedAmount + bonusAmount - deductionAmount,
+        );
+
+        return {
+          monthlySettlementId: settlement.id,
+          userId,
+          attendanceDays: roundToTwo(attendanceDays),
+          attendancePercentage: roundToTwo(attendancePercentage),
+          calculatedAmount: roundToTwo(calculatedAmount),
+          bonusAmount: roundToTwo(bonusAmount),
+          deductionAmount: roundToTwo(deductionAmount),
+          finalPayableAmount,
+        };
+      },
+    );
+
+    /*
+     * No skipDuplicates here.
+     *
+     * We just deleted the existing details.
+     * Any duplicate userId would indicate a bug.
+     */
+    await prisma.monthlySettlementDetail.createMany({
+      data: settlementDetails,
+    });
+
+    /*
+     * ==================================================
+     * 6. Update Academic Month
+     * ==================================================
+     */
+
+    await prisma.academicMonth.update({
+      where: {
+        id: academicMonthId,
+      },
+      data: {
+        settlementStatus: "GENERATED",
+      },
+    });
+
+    /*
+     * ==================================================
+     * 7. Return Settlement
+     * ==================================================
+     */
+
+    const settlementWithDetails = await prisma.monthlySettlement.findUnique({
+      where: {
+        id: settlement.id,
+      },
+      include: {
+        monthlySettlementDetails: true,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Monthly settlement generated.",
+      data: settlementWithDetails,
+    });
+  } catch (error: any) {
+    console.error("generateMonthlySettlement error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+export const addSettlementAdjustment = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const settlementId =
+      typeof req.params.settlementId === "string"
+        ? req.params.settlementId
+        : undefined;
+    const detailId =
+      typeof req.params.detailId === "string" ? req.params.detailId : undefined;
+    const { adjustmentType, amount, reason } = req.body;
+
+    if (!settlementId || !detailId) {
+      res
+        .status(400)
+        .json({ success: false, message: "Invalid settlement or detail id." });
+      return;
+    }
+
+    if (!adjustmentType || amount === undefined || !reason) {
+      res.status(400).json({
+        success: false,
+        message: "adjustmentType, amount, and reason are required.",
+      });
+      return;
+    }
+
+    const settlement = await prisma.monthlySettlement.findUnique({
+      where: { id: settlementId },
+    });
+    if (!settlement) {
+      res.status(404).json({
+        success: false,
+        message: "Settlement not found.",
+        code: "RESOURCE_NOT_FOUND",
+      });
+      return;
+    }
+
+    const detail = await prisma.monthlySettlementDetail.findUnique({
+      where: { id: detailId },
+    });
+    if (!detail || detail.monthlySettlementId !== settlementId) {
+      res.status(404).json({
+        success: false,
+        message: "Settlement detail not found.",
+        code: "RESOURCE_NOT_FOUND",
+      });
+      return;
+    }
+
+    const adjustment = await prisma.settlementAdjustment.create({
+      data: {
+        monthlySettlementDetailId: detail.id,
+        adjustmentType,
+        amount,
+        reason,
+        adjustedBy: req.user!.userId,
+      },
+    });
+
+    const bonusAmount =
+      adjustmentType === "BONUS"
+        ? Number(detail.bonusAmount) + Number(amount)
+        : Number(detail.bonusAmount);
+    const deductionAmount =
+      adjustmentType === "DEDUCTION"
+        ? Number(detail.deductionAmount) + Number(amount)
+        : Number(detail.deductionAmount);
+    const finalPayableAmount = roundToTwo(
+      Number(detail.calculatedAmount) + bonusAmount - deductionAmount,
+    );
+
+    const updatedDetail = await prisma.monthlySettlementDetail.update({
+      where: { id: detail.id },
+      data: {
+        bonusAmount,
+        deductionAmount,
+        finalPayableAmount,
+      },
+      include: { adjustments: true },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Settlement adjustment applied successfully.",
+      data: { adjustment, detail: updatedDetail },
+    });
+  } catch (error: any) {
+    console.error("addSettlementAdjustment error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+export const lockMonthlySettlement = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const id = typeof req.params.id === "string" ? req.params.id : undefined;
+    if (!id) {
+      res
+        .status(400)
+        .json({ success: false, message: "Invalid settlement id." });
+      return;
+    }
+
+    const settlement = await prisma.monthlySettlement.findUnique({
+      where: { id },
+    });
+    if (!settlement) {
+      res
+        .status(404)
+        .json({ success: false, message: "Settlement not found." });
+      return;
+    }
+
+    if (settlement.settlementStatus === "LOCKED") {
+      res.status(400).json({
+        success: false,
+        message: "Settlement is already locked.",
+        code: "SETTLEMENT_LOCKED",
+      });
+      return;
+    }
+
+    const locked = await prisma.monthlySettlement.update({
+      where: { id },
+      data: {
+        settlementStatus: "LOCKED",
+        lockedAt: dayjs().toDate(),
+        lockedBy: req.user!.userId,
+      },
+    });
+
+    await prisma.academicMonth.update({
+      where: { id: locked.academicMonthId },
+      data: { settlementStatus: "LOCKED" },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Monthly settlement locked successfully.",
+      data: locked,
+    });
+  } catch (error: any) {
+    console.error("lockMonthlySettlement error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
