@@ -204,7 +204,7 @@ model MarhalaFeeConfiguration {
 
 model Student {
   id                 String        @id @default(uuid()) @db.Uuid
-  itsNumber          Int           @unique @db.VarChar(10)
+  itsNumber          String        @unique @db.VarChar(10)
   firstName          String        @db.VarChar(100)
   lastName           String?       @db.VarChar(100)
   fullName           String        @db.VarChar(200)
